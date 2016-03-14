@@ -29,5 +29,8 @@
     <ClInclude Include="simpleregexnfa.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="distinct_queue.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

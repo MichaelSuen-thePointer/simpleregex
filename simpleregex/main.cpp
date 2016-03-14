@@ -1,4 +1,3 @@
-#include <vld.h>
 #include "simpleregexparser.h"
 #include "simpleregexnfa.h"
 using namespace pl;
@@ -32,5 +31,7 @@ int main()
 
     NFA nfa = NFA::generate(result2, "a");
     nfa.combine_regex(result3, "abcdefg");
+
+    auto result = nfa.match("abcdefg");
 
 }

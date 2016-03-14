@@ -4,6 +4,7 @@
 
 #include "simpleregexdecl.h"
 #include <vector>
+#include <queue>
 namespace pl
 {
 namespace regex
@@ -89,6 +90,7 @@ private:
             NFAGenerator expr;
             node.expr()->accept(expr);
             expr.end->weakEdges.push_back(WeakEdge{'\0', expr.start});
+            expr.start->weakEdges.push_back(WeakEdge{'\0', expr.end});
             start = expr.start;
             end = expr.end;
             end->stateName = _name;
@@ -122,6 +124,63 @@ public:
         startState->strongEdges.push_back(StrongEdge{'\0', generator.start});
         endStates.push_back(generator.end);
         return *this;
+    }
+    vector<string> match(string str)
+    {
+        using std::queue;
+        using state_pair = std::pair<Node*, string::iterator>;
+        struct state_pair_compare
+        {
+            size_t operator()(const state_pair& obj) const
+            {
+                return std::hash<Node*>()(obj.first);
+            }
+        };
+
+        vector<string> results;
+
+        queue<state_pair> currentStates;
+        
+        currentStates.push({startState.get(), str.begin()});
+
+        while (currentStates.size())
+        {
+            const auto& current = currentStates.front();
+            if (current.second == str.end())
+            {
+                if (current.first->stateName != "")
+                {
+                    results.push_back(current.first->stateName);
+                }
+            }
+            else
+            {
+                for (const auto& edge : current.first->strongEdges)
+                {
+                    if (edge.accept == '\0')
+                    {
+                        currentStates.insert({edge.next.get(), current.second});
+                    }
+                    else if (edge.accept == *(current.second))
+                    {
+                        currentStates.insert({edge.next.get(), current.second + 1});
+                    }
+                }
+                for (const auto& edge : current.first->weakEdges)
+                {
+                    if (edge.accept == '\0')
+                    {
+                        currentStates.insert({edge.next.lock().get(), current.second});
+                    }
+                    else if (edge.accept == *(current.second))
+                    {
+                        currentStates.insert({edge.next.lock().get(), current.second + 1});
+                    }
+                }
+            }
+            currentStates.erase(currentStates.begin());
+        }
+        return results;
     }
 };
 

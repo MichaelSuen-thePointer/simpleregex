@@ -3,8 +3,8 @@
 #define SIMPLE_REGEX_NFA
 
 #include "simpleregexdecl.h"
+#include "distinct_queue.h"
 #include <vector>
-#include <queue>
 namespace pl
 {
 namespace regex
@@ -16,7 +16,7 @@ using std::unique_ptr;
 using std::shared_ptr;
 using std::weak_ptr;
 
-class NFA
+class EpsilonNFA
 {
 private:
     struct Node;
@@ -105,19 +105,19 @@ private:
     };
     shared_ptr<Node> startState;
     vector<shared_ptr<Node>> endStates;
-    NFA(shared_ptr<Node> start, shared_ptr<Node> end)
+    EpsilonNFA(shared_ptr<Node> start, shared_ptr<Node> end)
         : startState(start)
         , endStates{end}
     {
     }
 public:
-    static NFA generate(shared_ptr<Regex> regex, string matchName)
+    static EpsilonNFA generate(shared_ptr<Regex> regex, string matchName)
     {
         NFAGenerator generator(matchName);
         regex->accept(generator);
-        return NFA(generator.start, generator.end);
+        return EpsilonNFA(generator.start, generator.end);
     }
-    NFA& combine_regex(shared_ptr<Regex> regex, string matchName)
+    EpsilonNFA& combine_regex(shared_ptr<Regex> regex, string matchName)
     {
         NFAGenerator generator(matchName);
         regex->accept(generator);
@@ -125,21 +125,20 @@ public:
         endStates.push_back(generator.end);
         return *this;
     }
-    vector<string> match(string str)
+    /*
+    string match_first(string str)
     {
-        using std::queue;
+        using container::distinct_queue;
         using state_pair = std::pair<Node*, string::iterator>;
-        struct state_pair_compare
+
+        struct state_pair_equal
         {
-            size_t operator()(const state_pair& obj) const
+            bool operator()(const state_pair& lhs, const state_pair& rhs) const
             {
-                return std::hash<Node*>()(obj.first);
+                return lhs.first == rhs.first;
             }
         };
-
-        vector<string> results;
-
-        queue<state_pair> currentStates;
+        distinct_queue<state_pair, state_pair_equal> currentStates;
         
         currentStates.push({startState.get(), str.begin()});
 
@@ -150,7 +149,7 @@ public:
             {
                 if (current.first->stateName != "")
                 {
-                    results.push_back(current.first->stateName);
+                    return current.first->stateName;
                 }
             }
             else
@@ -159,29 +158,30 @@ public:
                 {
                     if (edge.accept == '\0')
                     {
-                        currentStates.insert({edge.next.get(), current.second});
+                        currentStates.push({edge.next.get(), current.second});
                     }
                     else if (edge.accept == *(current.second))
                     {
-                        currentStates.insert({edge.next.get(), current.second + 1});
+                        currentStates.push({edge.next.get(), current.second + 1});
                     }
                 }
                 for (const auto& edge : current.first->weakEdges)
                 {
                     if (edge.accept == '\0')
                     {
-                        currentStates.insert({edge.next.lock().get(), current.second});
+                        currentStates.push({edge.next.lock().get(), current.second});
                     }
                     else if (edge.accept == *(current.second))
                     {
-                        currentStates.insert({edge.next.lock().get(), current.second + 1});
+                        currentStates.push({edge.next.lock().get(), current.second + 1});
                     }
                 }
             }
-            currentStates.erase(currentStates.begin());
+            currentStates.pop();
         }
-        return results;
+        return "";
     }
+    */
 };
 
 

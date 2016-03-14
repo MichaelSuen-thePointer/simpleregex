@@ -11,7 +11,7 @@ int main()
     auto regex3 = "abcdefg";
     auto regex4 = "a|b|c|d|e";
     auto regex5 = "a*b";
-    auto regex6 = "abcd|e|f|g";
+    auto regex6 = "a*a";
     auto regex7 = "(abc)def";
     auto regex8 = "(abc)*def";
     auto regex9 = "(a|b*)|(d*e)";
@@ -29,9 +29,11 @@ int main()
     auto result8 = parser.parse(regex8);
     auto result9 = parser.parse(regex9);
 
-    NFA nfa = NFA::generate(result2, "a");
+    EpsilonNFA nfa = EpsilonNFA::generate(result2, "a");
     nfa.combine_regex(result3, "abcdefg");
+    nfa.combine_regex(result5, "astarb");
+    nfa.combine_regex(result6, "astara");
 
-    auto result = nfa.match("abcdefg");
+    auto result = nfa.match_first("aaaaab");
 
 }

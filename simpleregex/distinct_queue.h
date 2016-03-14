@@ -5,11 +5,15 @@
 #include <algorithm>
 #include <deque>
 
-template<class T, class TCompare = std::less<T>>
+namespace pl
+{
+namespace container
+{
+
+template<class T, class TEqual = std::equal_to<T>>
 class distinct_queue
 {
 private:
-    TCompare _compare;
     std::deque<T> _queue;
 
     struct equal_compare
@@ -17,7 +21,7 @@ private:
         const T& _rhs;
         bool operator()(const T& lhs) const
         {
-            return !_compare(lhs, rhs) && !_compare(rhs, lhs);
+            return TEqual()(lhs, _rhs);
         }
         equal_compare(const T& rhs)
             :_rhs(rhs)
@@ -35,13 +39,22 @@ public:
     }
     void push(const T& value)
     {
-        if (std::find_if(_queue.begin(), _queue.end(),
-                         [&value](const T& other) {return equal_compare()(other, value); })
+        if (std::find_if(_queue.begin(), _queue.end(), equal_compare(value))
             == _queue.end())
         {
             _queue.push_back(value);
         }
     }
+    void pop()
+    {
+        _queue.pop_front();
+    }
+    size_t size()
+    {
+        return _queue.size();
+    }
 };
 
+}
+}
 #endif // !DISTINCT_QUEUE_H

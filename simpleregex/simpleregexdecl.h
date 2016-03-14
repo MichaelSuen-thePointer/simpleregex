@@ -24,7 +24,7 @@ class Regex
 public:
     virtual ~Regex() {}
     virtual bool match(iterator&) = 0;
-    
+
     class IVisitor
     {
     private:
@@ -46,14 +46,8 @@ public:
 class Empty: public Regex
 {
 public:
-    virtual bool match(iterator&) override
-    {
-        return true;
-    }
-    virtual void accept(IVisitor& visitor) override
-    {
-        visitor.visit(*this);
-    }
+    virtual bool match(iterator&) override;
+    virtual void accept(IVisitor&) override;
 };
 
 class Char: public Regex
@@ -65,23 +59,12 @@ public:
         : _ch(ch)
     {
     }
-    virtual ~Char()
-    {
-    }
+    virtual ~Char() {}
+    
     char ch() { return _ch; }
-    virtual bool match(iterator& iter) override
-    {
-        if (*iter == _ch)
-        {
-            iter++;
-            return true;
-        }
-        return false;
-    }
-    virtual void accept(IVisitor& visitor) override
-    {
-        visitor.visit(*this);
-    }
+
+    virtual bool match(iterator&) override;
+    virtual void accept(IVisitor&) override;
 };
 
 class Concat: public Regex
@@ -98,23 +81,11 @@ public:
     virtual ~Concat()
     {
     }
-    const unique_ptr<Regex>& left() { return _left; }
-    const unique_ptr<Regex>& right() { return _right; }
+    Regex* left() { return _left.get(); }
+    Regex* right() { return _right.get(); }
 
-    virtual bool match(iterator& iter) override
-    {
-        iterator backUp = iter;
-        if (_left->match(iter) && _right->match(iter))
-        {
-            return true;
-        }
-        iter = backUp;
-        return false;
-    }
-    virtual void accept(IVisitor& visitor) override
-    {
-        visitor.visit(*this);
-    }
+    virtual bool match(iterator&) override;
+    virtual void accept(IVisitor&) override;
 };
 
 class Or: public Regex
@@ -132,20 +103,10 @@ public:
     {
     }
 
-    const unique_ptr<Regex>& left() { return _left; }
-    const unique_ptr<Regex>& right() { return _right; }
-    virtual bool match(iterator& iter) override
-    {
-        if (_left->match(iter) || _right->match(iter))
-        {
-            return true;
-        }
-        return false;
-    }
-    virtual void accept(IVisitor& visitor) override
-    {
-        visitor.visit(*this);
-    }
+    Regex* left() { return _left.get(); }
+    Regex* right() { return _right.get(); }
+    virtual bool match(iterator& iter) override;
+    virtual void accept(IVisitor& visitor) override;
 };
 
 class Kleene: public Regex
@@ -161,21 +122,9 @@ public:
     {
     }
 
-    const unique_ptr<Regex>& expr() { return _expr; }
-    virtual bool match(iterator& iter) override
-    {
-        iterator backUp;
-        do
-        {
-            backUp = iter;
-        } while (_expr->match(iter));
-        iter = backUp;
-        return true;
-    }
-    virtual void accept(IVisitor& visitor) override
-    {
-        visitor.visit(*this);
-    }
+    Regex* expr() { return _expr.get(); }
+    virtual bool match(iterator& iter) override;
+    virtual void accept(IVisitor& visitor) override;
 };
 
 }

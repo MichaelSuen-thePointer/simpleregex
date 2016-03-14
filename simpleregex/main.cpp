@@ -34,6 +34,6 @@ int main()
     nfa.combine_regex(result5, "astarb");
     nfa.combine_regex(result6, "astara");
 
-    auto result = nfa.match_first("aaaaab");
+    //auto result = nfa.match_first("aaaaab");
 
 }

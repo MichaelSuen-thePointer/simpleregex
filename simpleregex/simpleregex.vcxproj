@@ -147,6 +147,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="simpleregexdecl.cpp" />
+    <ClCompile Include="simpleregexnfa.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="distinct_queue.h" />

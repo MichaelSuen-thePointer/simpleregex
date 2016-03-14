@@ -109,7 +109,6 @@ public:
         LBRACE = 258,
         RBRACE = 259,
     };
-
     RegexTokenizer()
         : _stream()
         , _prefetch()

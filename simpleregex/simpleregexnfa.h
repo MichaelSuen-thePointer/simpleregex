@@ -49,52 +49,11 @@ private:
         shared_ptr<Node> end;
     private:
         string _name;
-        virtual void visit(Empty&) override
-        {
-            shared_ptr<Node> newNode = std::make_shared<Node>();
-            start->strongEdges.push_back(StrongEdge{'\0', newNode});
-            end = newNode;
-            end->stateName = _name;
-        }
-        virtual void visit(Char& node) override
-        {
-            shared_ptr<Node> newNode = std::make_shared<Node>();
-            start->strongEdges.push_back(StrongEdge{node.ch(), newNode});
-            end = newNode;
-            end->stateName = _name;
-        }
-        virtual void visit(Concat& node) override
-        {
-            NFAGenerator left, right;
-            node.left()->accept(left);
-            node.right()->accept(right);
-            start = left.start;
-            left.end->strongEdges.push_back(StrongEdge{'\0', right.start});
-            end = right.end;
-            end->stateName = _name;
-        }
-        virtual void visit(Or& node) override
-        {
-            NFAGenerator left, right;
-            node.left()->accept(left);
-            node.right()->accept(right);
-            right.start->strongEdges.push_back(StrongEdge{'\0', left.start});
-            right.end->strongEdges.push_back(StrongEdge{'\0', left.end});
-
-            start = right.start;
-            end = right.end;
-            end->stateName = _name;
-        }
-        virtual void visit(Kleene& node) override
-        {
-            NFAGenerator expr;
-            node.expr()->accept(expr);
-            expr.end->weakEdges.push_back(WeakEdge{'\0', expr.start});
-            expr.start->weakEdges.push_back(WeakEdge{'\0', expr.end});
-            start = expr.start;
-            end = expr.end;
-            end->stateName = _name;
-        }
+        virtual void visit(Empty&) override;
+        virtual void visit(Char&) override;
+        virtual void visit(Concat&) override;
+        virtual void visit(Or&) override;
+        virtual void visit(Kleene&) override;
     public:
         NFAGenerator(const string& name = string())
             : start(new Node(name))
@@ -111,20 +70,8 @@ private:
     {
     }
 public:
-    static EpsilonNFA generate(shared_ptr<Regex> regex, string matchName)
-    {
-        NFAGenerator generator(matchName);
-        regex->accept(generator);
-        return EpsilonNFA(generator.start, generator.end);
-    }
-    EpsilonNFA& combine_regex(shared_ptr<Regex> regex, string matchName)
-    {
-        NFAGenerator generator(matchName);
-        regex->accept(generator);
-        startState->strongEdges.push_back(StrongEdge{'\0', generator.start});
-        endStates.push_back(generator.end);
-        return *this;
-    }
+    static EpsilonNFA generate(shared_ptr<Regex> regex, string matchName);
+    EpsilonNFA& combine_regex(shared_ptr<Regex> regex, string matchName);
     /*
     string match_first(string str)
     {
@@ -139,7 +86,7 @@ public:
             }
         };
         distinct_queue<state_pair, state_pair_equal> currentStates;
-        
+
         currentStates.push({startState.get(), str.begin()});
 
         while (currentStates.size())

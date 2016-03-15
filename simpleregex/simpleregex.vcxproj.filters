@@ -21,7 +21,7 @@
     <ClCompile Include="simpleregexdecl.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="simpleregexnfa.cpp">
+    <ClCompile Include="simpleregexepsilonnfa.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,10 +32,16 @@
     <ClInclude Include="simpleregexparser.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="distinct_queue.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="simpleregexepsilonnfa.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="simpleregexnfa.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="distinct_queue.h">
+    <ClInclude Include="simpleregexautomationnode.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

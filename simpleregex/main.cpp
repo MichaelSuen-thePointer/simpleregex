@@ -1,5 +1,5 @@
 #include "simpleregexparser.h"
-#include "simpleregexnfa.h"
+#include "simpleregexepsilonnfa.h"
 using namespace pl;
 using namespace pl::regex;
 

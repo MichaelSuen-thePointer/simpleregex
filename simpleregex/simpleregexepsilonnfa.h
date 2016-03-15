@@ -40,14 +40,17 @@ private:
         {
         }
     };
-    shared_ptr<Node> startState;
-    vector<shared_ptr<Node>> endStates;
+    shared_ptr<Node> _startState;
+    vector<shared_ptr<Node>> _endStates;
     EpsilonNFA(shared_ptr<Node> start, shared_ptr<Node> end)
-        : startState(start)
-        , endStates{end}
+        : _startState(start)
+        , _endStates{end}
     {
     }
 public:
+    Node* start_state() const { return _startState.get(); }
+    const vector<shared_ptr<Node>>& end_states() const { return _endStates; }
+
     static EpsilonNFA generate(shared_ptr<Regex> regex, string matchName);
     EpsilonNFA& combine_regex(shared_ptr<Regex> regex, string matchName);
     /*

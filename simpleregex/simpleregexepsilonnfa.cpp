@@ -66,8 +66,8 @@ EpsilonNFA& EpsilonNFA::combine_regex(shared_ptr<Regex> regex, string matchName)
 {
     NFAGenerator generator(matchName);
     regex->accept(generator);
-    startState->strongEdges.push_back(StrongEdge{'\0', generator.start});
-    endStates.push_back(generator.end);
+    _startState->strongEdges.push_back(StrongEdge{'\0', generator.start});
+    _endStates.push_back(generator.end);
     return *this;
 }
 

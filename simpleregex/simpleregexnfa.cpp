@@ -13,18 +13,11 @@ inline void NFA::BFS_search(const EpsilonNFA & enfa, const function<void(Node*)>
         Node* current = toVisit.front();
         apply(current);
         visited[current] = true;
-        for (const auto& edge : current->strongEdges)
+        for (const auto& edge : current->edges)
         {
-            if (visited.find(edge.next.get()) == visited.end())
+            if (visited.find(edge.next) == visited.end())
             {
-                toVisit.push(edge.next.get());
-            }
-        }
-        for (const auto& edge : current->weakEdges)
-        {
-            if (visited.find(edge.next.lock().get()) == visited.end())
-            {
-                toVisit.push(edge.next.lock().get());
+                toVisit.push(edge.next);
             }
         }
         toVisit.pop();
@@ -34,18 +27,11 @@ inline set<Node*> NFA::find_valid_states(const EpsilonNFA & enfa)
 {
     set<Node*> validStates;
     auto apply = [&validStates](Node* node) {
-        for (const auto& edge : node->strongEdges)
+        for (const auto& edge : node->edges)
         {
             if (edge.accept != '\0')
             {
-                validStates.insert(edge.next.get());
-            }
-        }
-        for (const auto& edge : node->weakEdges)
-        {
-            if (edge.accept != '\0')
-            {
-                validStates.insert(edge.next.lock().get());
+                validStates.insert(edge.next);
             }
         }
     };
@@ -64,19 +50,9 @@ inline set<const Node*> NFA::find_epsilon_closure(const Node * node)
     {
         const Node* current = toVisit.front();
         visited[current] = true;
-        for (const auto& edge : current->strongEdges)
+        for (const auto& edge : current->edges)
         {
-            auto next = edge.next.get();
-            if (edge.accept == '\0' &&
-                visited.find(next) == visited.end())
-            {
-                toVisit.push(next);
-                closure.insert(next);
-            }
-        }
-        for (const auto& edge : current->weakEdges)
-        {
-            auto next = edge.next.lock().get();
+            auto next = edge.next;
             if (edge.accept == '\0' &&
                 visited.find(next) == visited.end())
             {
@@ -91,41 +67,36 @@ inline set<const Node*> NFA::find_epsilon_closure(const Node * node)
 NFA NFA::generate(const EpsilonNFA & enfa)
 {
     set<Node*> validStates = find_valid_states(enfa);
-    map<const Node*, shared_ptr<Node>> old2new;
+    map<const Node*, Node*> old2new;
+
     NFA nfa;
-    nfa.startState = std::make_shared<Node>();
+
+    nfa._pool.push_back(std::make_unique<Node>());
+
+    nfa.startState = nfa._pool.back().get();
+
     old2new[enfa.start_state()] = nfa.startState;
     for (const Node* state : validStates)
     {
         if (old2new.find(state) == old2new.end())
         {
-            old2new[state] = std::make_shared<Node>(state->stateName);
+            nfa._pool.push_back(std::make_unique<Node>(state->stateName));
+            old2new[state] = nfa._pool.back().get();
         }
         auto eClosure = find_epsilon_closure(state);
         for (auto node : eClosure)
         {
-            for (const auto& edge : node->strongEdges)
+            for (const auto& edge : node->edges)
             {
                 if (edge.accept != '\0')
                 {
-                    auto next = edge.next.get();
+                    auto next = edge.next;
                     if (old2new.find(next) == old2new.end())
                     {
-                        old2new[next] = std::make_shared<Node>(next->stateName);
+                        nfa._pool.push_back(std::make_unique<Node>(next->stateName));
+                        old2new[next] = nfa._pool.back().get();
                     }
-                    old2new[state]->strongEdges.push_back(StrongEdge{edge.accept, old2new[next]});
-                }
-            }
-            for (const auto& edge : node->weakEdges)
-            {
-                if (edge.accept != '\0')
-                {
-                    auto next = edge.next.lock().get();
-                    if (old2new.find(next) == old2new.end())
-                    {
-                        old2new[next] = std::make_shared<Node>(next->stateName);
-                    }
-                    old2new[state]->weakEdges.push_back(WeakEdge{edge.accept, old2new[next]});
+                    old2new[state]->edges.push_back(Edge{edge.accept, old2new[next]});
                 }
             }
         }
@@ -144,14 +115,14 @@ vector<string> NFA::match_all(const string & text)
     {
         bool operator()(const state_pair& lhs, const state_pair& rhs) const
         {
-            return lhs.first == rhs.first;
+            return lhs.first == rhs.first && lhs.second == rhs.second;
         }
     };
 
     vector<string> results;
     distinct_queue<state_pair, state_pair_equal> currentStates;
 
-    currentStates.push({startState.get(), text.begin()});
+    currentStates.push({startState, text.begin()});
 
     while (currentStates.size())
     {
@@ -165,18 +136,11 @@ vector<string> NFA::match_all(const string & text)
         }
         else
         {
-            for (const auto& edge : current.first->strongEdges)
+            for (const auto& edge : current.first->edges)
             {
                 if (edge.accept == *(current.second))
                 {
-                    currentStates.push({edge.next.get(), current.second + 1});
-                }
-            }
-            for (const auto& edge : current.first->weakEdges)
-            {
-                if (edge.accept == *(current.second))
-                {
-                    currentStates.push({edge.next.lock().get(), current.second + 1});
+                    currentStates.push({edge.next, current.second + 1});
                 }
             }
         }

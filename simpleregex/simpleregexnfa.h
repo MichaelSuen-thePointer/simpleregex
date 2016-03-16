@@ -23,7 +23,8 @@ using std::queue;
 class NFA
 {
 protected:
-    shared_ptr<Node> startState;
+    vector<unique_ptr<Node>> _pool;
+    Node* startState;
 
     static void BFS_search(const EpsilonNFA& enfa, const function<void(Node*)> apply);
 
@@ -36,6 +37,32 @@ public:
     static NFA generate(const EpsilonNFA& enfa);
 
     vector<string> match_all(const string& text);
+
+    void debug_print(std::ostream& os)
+    {
+        map<Node*, bool> visited;
+        queue<Node*> toVisit;
+        toVisit.push(startState);
+        while (toVisit.size())
+        {
+            Node* current = toVisit.front();
+            
+            os << current << "\t";
+            os << (current->stateName.size() ? current->stateName : "\t" ) << "\n";
+
+            visited[current] = true;
+            for (const auto& edge : current->edges)
+            {
+                os << "\t" << edge.accept << " S->" << edge.next<< "\n";
+
+                if (visited.find(edge.next) == visited.end())
+                {
+                    toVisit.push(edge.next);
+                }
+            }
+            toVisit.pop();
+        }
+    }
 };
 
 

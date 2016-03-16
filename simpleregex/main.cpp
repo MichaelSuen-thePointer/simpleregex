@@ -1,3 +1,6 @@
+#include <vld.h>
+#include <iostream>
+#include <iterator>
 #include "simpleregexparser.h"
 #include "simpleregexepsilonnfa.h"
 #include "simpleregexnfa.h"
@@ -9,7 +12,7 @@ int main()
 
     auto regex1 = "";
     auto regex2 = "a";
-    auto regex3 = "abcdefg";
+    auto regex3 = "aaaaaaab";
     auto regex4 = "a|b|c|d|e";
     auto regex5 = "a*b";
     auto regex6 = "a*a";
@@ -31,11 +34,15 @@ int main()
     auto result9 = parser.parse(regex9);
 
     EpsilonNFA enfa = EpsilonNFA::generate(result2, "a");
-    enfa.combine_regex(result3, "abcdefg");
+    enfa.combine_regex(result3, "7ab");
     enfa.combine_regex(result5, "astarb");
     enfa.combine_regex(result6, "astara");
 
     NFA nfa = NFA::generate(enfa);
-
     
+    auto results = nfa.match_all("aaaaaaab");
+    
+    nfa.debug_print(std::cout);
+
+    std::copy(results.begin(), results.end(), std::ostream_iterator<string>(std::cout, "\n"));
 }

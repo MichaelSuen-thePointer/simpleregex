@@ -17,28 +17,20 @@ using std::vector;
 using std::string;
 
 struct Node;
-struct StrongEdge;
-struct StrongEdge
+struct Edge
 {
     char accept;
-    shared_ptr<Node> next;
-};
-struct WeakEdge
-{
-    char accept;
-    weak_ptr<Node> next;
+    Node* next;
 };
 struct Node
 {
-    vector<StrongEdge> strongEdges;
-    vector<WeakEdge> weakEdges;
+    vector<Edge> edges;
     string stateName;
     Node(const string& name = string())
         : stateName(name)
     {
     }
 };
-
 
 }
 }

@@ -12,6 +12,8 @@ namespace regex
 
 using iterator = std::string::iterator;
 using std::unique_ptr;
+using std::shared_ptr;
+using std::string;
 
 class Empty;
 class Char;
@@ -19,10 +21,10 @@ class Concat;
 class Or;
 class Kleene;
 
-class Regex
+class IRegex
 {
 public:
-    virtual ~Regex() {}
+    virtual ~IRegex() = default;
     virtual bool match(iterator&) = 0;
 
     class IVisitor
@@ -43,14 +45,14 @@ public:
     virtual void accept(IVisitor&) = 0;
 };
 
-class Empty: public Regex
+class Empty: public IRegex
 {
 public:
     virtual bool match(iterator&) override;
     virtual void accept(IVisitor&) override;
 };
 
-class Char: public Regex
+class Char: public IRegex
 {
 protected:
     char _ch;
@@ -67,65 +69,80 @@ public:
     virtual void accept(IVisitor&) override;
 };
 
-class Concat: public Regex
+class Concat: public IRegex
 {
 protected:
-    unique_ptr<Regex> _left;
-    unique_ptr<Regex> _right;
+    unique_ptr<IRegex> _left;
+    unique_ptr<IRegex> _right;
 public:
-    Concat(Regex* left, Regex* right)
+    Concat(IRegex* left, IRegex* right)
         : _left(left)
         , _right(right)
+    {
+    }
+    Concat(unique_ptr<IRegex>&& left, unique_ptr<IRegex>&& right)
+        : _left(std::move(left))
+        , _right(std::move(right))
     {
     }
     virtual ~Concat()
     {
     }
-    Regex* left() { return _left.get(); }
-    Regex* right() { return _right.get(); }
+    IRegex* left() { return _left.get(); }
+    IRegex* right() { return _right.get(); }
 
     virtual bool match(iterator&) override;
     virtual void accept(IVisitor&) override;
 };
 
-class Or: public Regex
+class Or: public IRegex
 {
 protected:
-    unique_ptr<Regex> _left;
-    unique_ptr<Regex> _right;
+    unique_ptr<IRegex> _left;
+    unique_ptr<IRegex> _right;
 public:
-    Or(Regex* left, Regex* right)
+    Or(IRegex* left, IRegex* right)
         : _left(left)
         , _right(right)
+    {
+    }
+    Or(unique_ptr<IRegex>&& left, unique_ptr<IRegex> right)
+        : _left(std::move(left))
+        , _right(std::move(right))
     {
     }
     virtual ~Or()
     {
     }
 
-    Regex* left() { return _left.get(); }
-    Regex* right() { return _right.get(); }
+    IRegex* left() { return _left.get(); }
+    IRegex* right() { return _right.get(); }
     virtual bool match(iterator& iter) override;
     virtual void accept(IVisitor& visitor) override;
 };
 
-class Kleene: public Regex
+class Kleene: public IRegex
 {
 protected:
-    unique_ptr<Regex> _expr;
+    unique_ptr<IRegex> _expr;
 public:
-    Kleene(Regex* expr)
+    Kleene(IRegex* expr)
         : _expr(expr)
+    {
+    }
+    Kleene(unique_ptr<IRegex> expr)
+        : _expr(std::move(expr))
     {
     }
     virtual ~Kleene()
     {
     }
 
-    Regex* expr() { return _expr.get(); }
+    IRegex* expr() { return _expr.get(); }
     virtual bool match(iterator& iter) override;
     virtual void accept(IVisitor& visitor) override;
 };
+
 
 }
 }

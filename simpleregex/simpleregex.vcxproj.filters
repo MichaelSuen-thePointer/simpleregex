@@ -27,6 +27,9 @@
     <ClCompile Include="simpleregexnfa.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="simpleregex.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="simpleregexdecl.h">
@@ -45,6 +48,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="simpleregexautomationnode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="simpleregex.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

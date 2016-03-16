@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <initializer_list>
 #include <sstream>
+
 namespace pl
 {
 namespace regex
@@ -192,9 +193,9 @@ private:
 
     using Token = RegexTokenizer;
 
-    unique_ptr<Regex> parse_char()
+    unique_ptr<IRegex> parse_char()
     {
-        unique_ptr<Regex> result;
+        unique_ptr<IRegex> result;
         int token = _token_stream.get();
         if (Token::is_char(token))
         {
@@ -214,9 +215,9 @@ private:
         return result;
     }
 
-    unique_ptr<Regex> parse_or_term()
+    unique_ptr<IRegex> parse_or_term()
     {
-        unique_ptr<Regex> result;
+        unique_ptr<IRegex> result;
         int token;
         result = parse_char();
         token = _token_stream.peek();
@@ -229,9 +230,9 @@ private:
         return result;
     }
 
-    unique_ptr<Regex> parse_concat_term()
+    unique_ptr<IRegex> parse_concat_term()
     {
-        unique_ptr<Regex> result;
+        unique_ptr<IRegex> result;
         result = parse_or_term();
         int token = _token_stream.peek();
         if (Token::is_char(token))
@@ -246,7 +247,7 @@ private:
         return result;
     }
 
-    unique_ptr<Regex> parse_expr()
+    unique_ptr<IRegex> parse_expr()
     {
         if (_token_stream.peek() != Token::END)
         {
@@ -271,15 +272,15 @@ public:
     {
         _token_stream.reset();
     }
-    shared_ptr<Regex> parse(string expr)
+    unique_ptr<IRegex> parse(string expr)
     {
         reset(expr);
         return parse();
     }
-    shared_ptr<Regex> parse()
+    unique_ptr<IRegex> parse()
     {
         reset();
-        return shared_ptr<Regex>(parse_expr());
+        return parse_expr();
     }
 };
 

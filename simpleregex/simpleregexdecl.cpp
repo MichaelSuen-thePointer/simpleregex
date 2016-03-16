@@ -4,17 +4,17 @@ namespace pl
 namespace regex
 {
 
-bool Empty::match(iterator &)
+bool Empty::match(iterator&)
 {
     return true;
 }
 
-void Empty::accept(IVisitor & visitor)
+void Empty::accept(IVisitor& visitor)
 {
     visitor.visit(*this);
 }
 
-bool Char::match(iterator & iter)
+bool Char::match(iterator& iter)
 {
     if (*iter == _ch)
     {
@@ -24,15 +24,15 @@ bool Char::match(iterator & iter)
     return false;
 }
 
-void Char::accept(IVisitor & visitor)
+void Char::accept(IVisitor& visitor)
 {
     visitor.visit(*this);
 }
 
-bool Concat::match(iterator & iter)
+bool Concat::match(iterator& iter)
 {
     iterator backUp = iter;
-    if (_left->match(iter) && _right->match(iter))
+    if (_left->match(iter)&& _right->match(iter))
     {
         return true;
     }
@@ -40,12 +40,12 @@ bool Concat::match(iterator & iter)
     return false;
 }
 
-void Concat::accept(IVisitor & visitor)
+void Concat::accept(IVisitor& visitor)
 {
     visitor.visit(*this);
 }
 
-bool Or::match(iterator & iter)
+bool Or::match(iterator& iter)
 {
     if (_left->match(iter) || _right->match(iter))
     {
@@ -54,12 +54,12 @@ bool Or::match(iterator & iter)
     return false;
 }
 
-void Or::accept(IVisitor & visitor)
+void Or::accept(IVisitor& visitor)
 {
     visitor.visit(*this);
 }
 
-bool Kleene::match(iterator & iter)
+bool Kleene::match(iterator& iter)
 {
     iterator backUp;
     do
@@ -70,7 +70,7 @@ bool Kleene::match(iterator & iter)
     return true;
 }
 
-void Kleene::accept(IVisitor & visitor)
+void Kleene::accept(IVisitor& visitor)
 {
     visitor.visit(*this);
 }

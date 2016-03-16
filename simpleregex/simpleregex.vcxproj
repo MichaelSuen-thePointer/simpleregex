@@ -147,12 +147,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="simpleregex.cpp" />
     <ClCompile Include="simpleregexdecl.cpp" />
     <ClCompile Include="simpleregexepsilonnfa.cpp" />
     <ClCompile Include="simpleregexnfa.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="distinct_queue.h" />
+    <ClInclude Include="simpleregex.h" />
     <ClInclude Include="simpleregexautomationnode.h" />
     <ClInclude Include="simpleregexdecl.h" />
     <ClInclude Include="simpleregexnfa.h" />

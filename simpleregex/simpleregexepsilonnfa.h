@@ -2,6 +2,7 @@
 #ifndef SIMPLE_REGEX_EPSILON_NFA
 #define SIMPLE_REGEX_EPSILON_NFA
 
+#include "simpleregexparser.h"
 #include "simpleregexdecl.h"
 #include "distinct_queue.h"
 #include "simpleregexautomationnode.h"
@@ -19,8 +20,8 @@ using std::weak_ptr;
 class EpsilonNFA
 {
 private:
-    
-    class NFAGenerator: public Regex::IVisitor
+
+    class NFAGenerator: public IRegex::IVisitor
     {
     public:
         vector<unique_ptr<Node>> _pool;
@@ -59,65 +60,9 @@ public:
     Node* start_state() const { return _startState; }
     const vector<Node*>& end_states() const { return _endStates; }
 
-    static EpsilonNFA generate(shared_ptr<Regex> regex, string matchName);
-    EpsilonNFA& combine_regex(shared_ptr<Regex> regex, string matchName);
-    /*
-    string match_first(string str)
-    {
-        using container::distinct_queue;
-        using state_pair = std::pair<Node*, string::iterator>;
-
-        struct state_pair_equal
-        {
-            bool operator()(const state_pair& lhs, const state_pair& rhs) const
-            {
-                return lhs.first == rhs.first;
-            }
-        };
-        distinct_queue<state_pair, state_pair_equal> currentStates;
-
-        currentStates.push({startState.get(), str.begin()});
-
-        while (currentStates.size())
-        {
-            const auto& current = currentStates.front();
-            if (current.second == str.end())
-            {
-                if (current.first->stateName != "")
-                {
-                    return current.first->stateName;
-                }
-            }
-            else
-            {
-                for (const auto& edge : current.first->strongEdges)
-                {
-                    if (edge.accept == '\0')
-                    {
-                        currentStates.push({edge.next.get(), current.second});
-                    }
-                    else if (edge.accept == *(current.second))
-                    {
-                        currentStates.push({edge.next.get(), current.second + 1});
-                    }
-                }
-                for (const auto& edge : current.first->weakEdges)
-                {
-                    if (edge.accept == '\0')
-                    {
-                        currentStates.push({edge.next.lock().get(), current.second});
-                    }
-                    else if (edge.accept == *(current.second))
-                    {
-                        currentStates.push({edge.next.lock().get(), current.second + 1});
-                    }
-                }
-            }
-            currentStates.pop();
-        }
-        return "";
-    }
-    */
+    static EpsilonNFA generate(const shared_ptr<IRegex>& regex, const string& matchName);
+    EpsilonNFA& combine_regex(const shared_ptr<IRegex>& regex, const string& matchName);
+    EpsilonNFA& combine_regex(const string& regex, const string& matchName);
 };
 
 

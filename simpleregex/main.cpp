@@ -1,5 +1,6 @@
 #include "simpleregexparser.h"
 #include "simpleregexepsilonnfa.h"
+#include "simpleregexnfa.h"
 using namespace pl;
 using namespace pl::regex;
 
@@ -29,11 +30,12 @@ int main()
     auto result8 = parser.parse(regex8);
     auto result9 = parser.parse(regex9);
 
-    EpsilonNFA nfa = EpsilonNFA::generate(result2, "a");
-    nfa.combine_regex(result3, "abcdefg");
-    nfa.combine_regex(result5, "astarb");
-    nfa.combine_regex(result6, "astara");
+    EpsilonNFA enfa = EpsilonNFA::generate(result2, "a");
+    enfa.combine_regex(result3, "abcdefg");
+    enfa.combine_regex(result5, "astarb");
+    enfa.combine_regex(result6, "astara");
 
-    //auto result = nfa.match_first("aaaaab");
+    NFA nfa = NFA::generate(enfa);
 
+    
 }

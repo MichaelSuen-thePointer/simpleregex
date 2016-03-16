@@ -6,9 +6,8 @@ namespace regex
 
 void EpsilonNFA::NFAGenerator::visit(Empty&)
 {
-    shared_ptr<Node> newNode = std::make_shared<Node>();
-    start->strongEdges.push_back(StrongEdge{'\0', newNode});
-    end = newNode;
+    start->weakEdges.push_back(WeakEdge{'\0', start});
+    end = start;
     end->stateName = _name;
 }
 
@@ -37,7 +36,7 @@ void EpsilonNFA::NFAGenerator::visit(Or& node)
     node.left()->accept(left);
     node.right()->accept(right);
     right.start->strongEdges.push_back(StrongEdge{'\0', left.start});
-    right.end->strongEdges.push_back(StrongEdge{'\0', left.end});
+    left.end->strongEdges.push_back(StrongEdge{'\0', right.end});
 
     start = right.start;
     end = right.end;

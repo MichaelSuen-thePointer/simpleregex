@@ -81,8 +81,6 @@ public:
         return Regex(parser.parse());
     }
 
-    IRegex* regex() { return _regex.get(); }
-
     const IRegex* regex() const { return _regex.get(); }
     IRegex* regex() { return _regex.get(); }
 

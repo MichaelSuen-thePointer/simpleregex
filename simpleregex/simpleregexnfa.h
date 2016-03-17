@@ -19,6 +19,7 @@ using std::set;
 using std::function;
 using std::map;
 using std::queue;
+using std::pair;
 using container::distinct_queue;
 
 class NFA
@@ -34,7 +35,7 @@ protected:
     static set<const Node*> find_epsilon_closure(const Node* node);
 
 private:
-    using state_pair = std::pair<Node*, string::const_iterator>;
+    using state_pair = pair<Node*, string::const_iterator>;
 
     struct state_pair_equal
     {
@@ -52,24 +53,25 @@ private:
         _matchStates.clear();
     }
 
-    bool match(const string& text);
+    bool unguarded_match(const string& text);
 public:
-    NFA()
-    {
-    }
-
     NFA(const EpsilonNFA& enfa)
     {
-        NFA nfa = generate(enfa);
-        _pool = std::move(nfa._pool);
-        _start = nfa._start;
+        auto nfa = generate(enfa);
+        _pool = std::move(nfa.first);
+        _start = nfa.second;
     }
 
-    static NFA generate(const EpsilonNFA& enfa);
+    Node* start() { return _start; }
+
+    const Node* start() const { return _start; }
+
+    static pair<vector<unique_ptr<Node>>, Node*> generate(const EpsilonNFA& enfa);
 
     vector<string> match_all(const string& text);
+
     string match_first(const string& text);
-    string match_next();
+
     bool can_match()
     {
         return _matchStates.size() > 0;

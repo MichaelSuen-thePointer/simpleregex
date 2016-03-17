@@ -1,7 +1,6 @@
-#include <vld.h>
 #include <iostream>
 #include <iterator>
-#include "simpleregex.h"
+#include "simpleregexdfa.h"
 
 using namespace pl;
 using namespace pl::regex;
@@ -16,5 +15,10 @@ int main()
 
     auto result3 = *regex1;
 
-    regex1 += regex1 + regex2;
+    regex1 += result2 + result3;
+
+    EpsilonNFA enfa(regex1, "abcdeabcde_or_abcde__rep");
+    NFA nfa(enfa);
+    DFA dfa(nfa);
+
 }

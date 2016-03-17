@@ -44,8 +44,10 @@ inline set<const Node*> NFA::find_epsilon_closure(const Node * node)
     map<const Node*, bool> visited;
     queue<const Node*> toVisit;
     set<const Node*> closure;
+
     toVisit.push(node);
     closure.insert(node);
+    
     while (toVisit.size())
     {
         const Node* current = toVisit.front();
@@ -62,9 +64,10 @@ inline set<const Node*> NFA::find_epsilon_closure(const Node * node)
         }
         toVisit.pop();
     }
+
     return closure;
 }
-bool NFA::match(const string & text)
+bool NFA::unguarded_match(const string & text)
 {
     const auto& current = _matchStates.front();
     if (current.second == text.end())
@@ -88,24 +91,24 @@ bool NFA::match(const string & text)
     _matchStates.pop();
     return false;
 }
-NFA NFA::generate(const EpsilonNFA & enfa)
+pair<vector<unique_ptr<Node>>, Node*> NFA::generate(const EpsilonNFA & enfa)
 {
     set<Node*> validStates = find_valid_states(enfa);
     map<const Node*, Node*> old2new;
 
-    NFA nfa;
+    vector<unique_ptr<Node>> pool;
 
-    nfa._pool.push_back(std::make_unique<Node>());
+    pool.push_back(std::make_unique<Node>());
 
-    nfa._start = nfa._pool.back().get();
+    Node* start = pool.back().get();
 
-    old2new[enfa.start_state()] = nfa._start;
+    old2new[enfa.start_state()] = start;
     for (const Node* state : validStates)
     {
         if (old2new.find(state) == old2new.end())
         {
-            nfa._pool.push_back(std::make_unique<Node>(state->stateName));
-            old2new[state] = nfa._pool.back().get();
+            pool.push_back(std::make_unique<Node>(state->stateName));
+            old2new[state] = pool.back().get();
         }
         auto eClosure = find_epsilon_closure(state);
         for (auto node : eClosure)
@@ -117,17 +120,16 @@ NFA NFA::generate(const EpsilonNFA & enfa)
                     auto next = edge.next;
                     if (old2new.find(next) == old2new.end())
                     {
-                        nfa._pool.push_back(std::make_unique<Node>(next->stateName));
-                        old2new[next] = nfa._pool.back().get();
+                        pool.push_back(std::make_unique<Node>(next->stateName));
+                        old2new[next] = pool.back().get();
                     }
                     old2new[state]->edges.push_back(Edge{edge.accept, old2new[next]});
                 }
             }
         }
-
     }
 
-    return nfa;
+    return std::make_pair(std::move(pool), start);
 }
 
 vector<string> NFA::match_all(const string & text)
@@ -138,7 +140,7 @@ vector<string> NFA::match_all(const string & text)
 
     while (can_match())
     {
-        match(text);
+        unguarded_match(text);
     }
     return results;
 }
@@ -147,9 +149,12 @@ string NFA::match_first(const string & text)
 {
     _matchStates.push({_start, text.begin()});
 
-    while (match(text) == false)
+    while (can_match())
     {
-        continue;
+        if (unguarded_match(text))
+        {
+            break;
+        }
     }
 
     if (_results.size() > 0)

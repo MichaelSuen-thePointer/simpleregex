@@ -22,22 +22,14 @@ protected:
 
     class Cloner: public IRegex::IVisitor
     {
-    private:
-#if defined DEBUG || defined _DEBUG
-        bool valid = true;
-#endif // DEBUG || defined _DEBUG
-        unique_ptr<IRegex> _result;
     public:
-
-        unique_ptr<IRegex>&& move_result()
+        unique_ptr<IRegex> move_result()
         {
-#if defined DEBUG || defined _DEBUG
-            assert(valid == true);
-#endif // defined DEBUG || defined _DEBUG
-
             return std::move(_result);
         }
     private:
+        unique_ptr<IRegex> _result;
+
         virtual void visit(Empty&) override;
         virtual void visit(Char&) override;
         virtual void visit(Concat&) override;

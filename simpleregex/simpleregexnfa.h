@@ -3,12 +3,12 @@
 #ifndef SIMPLE_REGEX_NFA
 #define SIMPLE_REGEX_NFA
 
-#include <memory>
 #include <set>
 #include <map>
 #include <functional>
 #include <queue>
 #include "simpleregexepsilonnfa.h"
+#include "distinct_queue.h"
 
 namespace pl
 {
@@ -19,12 +19,13 @@ using std::set;
 using std::function;
 using std::map;
 using std::queue;
+using container::distinct_queue;
 
 class NFA
 {
 protected:
     vector<unique_ptr<Node>> _pool;
-    Node* startState;
+    Node* _start;
 
     static void BFS_search(const EpsilonNFA& enfa, const function<void(Node*)> apply);
 
@@ -32,17 +33,52 @@ protected:
 
     static set<const Node*> find_epsilon_closure(const Node* node);
 
+private:
+    using state_pair = std::pair<Node*, string::const_iterator>;
 
+    struct state_pair_equal
+    {
+        bool operator()(const state_pair& lhs, const state_pair& rhs) const
+        {
+            return lhs.first == rhs.first && lhs.second == rhs.second;
+        }
+    };
+
+    distinct_queue<state_pair, state_pair_equal> _matchStates;
+    vector<string> _results;
+
+    void clear_states()
+    {
+        _matchStates.clear();
+    }
+
+    bool match(const string& text);
 public:
+    NFA()
+    {
+    }
+
+    NFA(const EpsilonNFA& enfa)
+    {
+        NFA nfa = generate(enfa);
+        _pool = std::move(nfa._pool);
+        _start = nfa._start;
+    }
+
     static NFA generate(const EpsilonNFA& enfa);
 
     vector<string> match_all(const string& text);
-
+    string match_first(const string& text);
+    string match_next();
+    bool can_match()
+    {
+        return _matchStates.size() > 0;
+    }
     void debug_print(std::ostream& os)
     {
         map<Node*, bool> visited;
         queue<Node*> toVisit;
-        toVisit.push(startState);
+        toVisit.push(_start);
         while (toVisit.size())
         {
             Node* current = toVisit.front();

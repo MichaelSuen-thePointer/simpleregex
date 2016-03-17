@@ -2,9 +2,7 @@
 #ifndef SIMPLE_REGEX_EPSILON_NFA
 #define SIMPLE_REGEX_EPSILON_NFA
 
-#include "simpleregexparser.h"
-#include "simpleregexdecl.h"
-#include "distinct_queue.h"
+#include "simpleregex.h"
 #include "simpleregexautomationnode.h"
 namespace pl
 {
@@ -20,7 +18,6 @@ using std::weak_ptr;
 class EpsilonNFA
 {
 private:
-
     class NFAGenerator: public IRegex::IVisitor
     {
     public:
@@ -46,21 +43,42 @@ private:
             _pool.push_back(std::make_unique<Node>());
             start = _pool.front().get();
         }
+
+        vector<unique_ptr<Node>> move_pool()
+        {
+            return std::move(_pool);
+        }
     };
+
     vector<unique_ptr<Node>> _pool;
     Node* _startState;
     vector<Node*> _endStates;
-    EpsilonNFA(vector<unique_ptr<Node>>&& pool, Node* start, Node* end)
-        : _pool(std::move(pool))
-        , _startState(start)
-        , _endStates{end}
+
+    EpsilonNFA(NFAGenerator& generator)
+        : _pool(generator.move_pool())
+        , _startState(generator.start)
+        , _endStates{generator.end}
     {
     }
 public:
+    EpsilonNFA(Regex& regex, const string& matchName)
+        : _pool()
+        , _startState()
+        , _endStates()
+    {
+        NFAGenerator generator(matchName);
+        regex.regex()->accept(generator);
+        _pool = generator.move_pool();
+        _startState = generator.start;
+        _endStates.push_back(generator.end);
+    }
+
+    static EpsilonNFA generate(Regex& regex, const string& matchName);
+    static EpsilonNFA generate(const shared_ptr<IRegex>& regex, const string& matchName);
+
     Node* start_state() const { return _startState; }
     const vector<Node*>& end_states() const { return _endStates; }
 
-    static EpsilonNFA generate(const shared_ptr<IRegex>& regex, const string& matchName);
     EpsilonNFA& combine_regex(const shared_ptr<IRegex>& regex, const string& matchName);
     EpsilonNFA& combine_regex(const string& regex, const string& matchName);
 };

@@ -84,6 +84,7 @@ public:
     IRegex* regex() { return _regex.get(); }
 
     const IRegex* regex() const { return _regex.get(); }
+    IRegex* regex() { return _regex.get(); }
 
     template<class Tl, class Tr, class, class> friend
     Regex operator+(Tl&& lhs, Tr&& rhs);

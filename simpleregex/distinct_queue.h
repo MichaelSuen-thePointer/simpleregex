@@ -53,6 +53,10 @@ public:
     {
         return _queue.size();
     }
+    void clear()
+    {
+        _queue.clear();
+    }
 };
 
 }

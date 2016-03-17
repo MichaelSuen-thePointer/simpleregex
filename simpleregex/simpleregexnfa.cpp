@@ -64,6 +64,30 @@ inline set<const Node*> NFA::find_epsilon_closure(const Node * node)
     }
     return closure;
 }
+bool NFA::match(const string & text)
+{
+    const auto& current = _matchStates.front();
+    if (current.second == text.end())
+    {
+        if (current.first->stateName != "")
+        {
+            _results.push_back(current.first->stateName);
+            return true;
+        }
+    }
+    else
+    {
+        for (const auto& edge : current.first->edges)
+        {
+            if (edge.accept == *(current.second))
+            {
+                _matchStates.push({edge.next, current.second + 1});
+            }
+        }
+    }
+    _matchStates.pop();
+    return false;
+}
 NFA NFA::generate(const EpsilonNFA & enfa)
 {
     set<Node*> validStates = find_valid_states(enfa);
@@ -73,9 +97,9 @@ NFA NFA::generate(const EpsilonNFA & enfa)
 
     nfa._pool.push_back(std::make_unique<Node>());
 
-    nfa.startState = nfa._pool.back().get();
+    nfa._start = nfa._pool.back().get();
 
-    old2new[enfa.start_state()] = nfa.startState;
+    old2new[enfa.start_state()] = nfa._start;
     for (const Node* state : validStates)
     {
         if (old2new.find(state) == old2new.end())
@@ -100,7 +124,7 @@ NFA NFA::generate(const EpsilonNFA & enfa)
                 }
             }
         }
-        
+
     }
 
     return nfa;
@@ -108,45 +132,31 @@ NFA NFA::generate(const EpsilonNFA & enfa)
 
 vector<string> NFA::match_all(const string & text)
 {
-    using container::distinct_queue;
-    using state_pair = std::pair<Node*, string::const_iterator>;
-
-    struct state_pair_equal
-    {
-        bool operator()(const state_pair& lhs, const state_pair& rhs) const
-        {
-            return lhs.first == rhs.first && lhs.second == rhs.second;
-        }
-    };
-
     vector<string> results;
-    distinct_queue<state_pair, state_pair_equal> currentStates;
 
-    currentStates.push({startState, text.begin()});
+    _matchStates.push({_start, text.begin()});
 
-    while (currentStates.size())
+    while (can_match())
     {
-        const auto& current = currentStates.front();
-        if (current.second == text.end())
-        {
-            if (current.first->stateName != "")
-            {
-                results.push_back(current.first->stateName);
-            }
-        }
-        else
-        {
-            for (const auto& edge : current.first->edges)
-            {
-                if (edge.accept == *(current.second))
-                {
-                    currentStates.push({edge.next, current.second + 1});
-                }
-            }
-        }
-        currentStates.pop();
+        match(text);
     }
     return results;
+}
+
+string NFA::match_first(const string & text)
+{
+    _matchStates.push({_start, text.begin()});
+
+    while (match(text) == false)
+    {
+        continue;
+    }
+
+    if (_results.size() > 0)
+    {
+        return _results.back();
+    }
+    return "";
 }
 
 }

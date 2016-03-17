@@ -75,11 +75,18 @@ void EpsilonNFA::NFAGenerator::adopt_pool(vector<unique_ptr<Node>>& rhs)
                  std::move_iterator<iter_type>(rhs.end()));
 }
 
+EpsilonNFA EpsilonNFA::generate(Regex& regex, const string& matchName)
+{
+    NFAGenerator generator(matchName);
+    regex.regex()->accept(generator);
+    return EpsilonNFA(generator)
+}
+
 EpsilonNFA EpsilonNFA::generate(const shared_ptr<IRegex>& regex, const string& matchName)
 {
     NFAGenerator generator(matchName);
     regex->accept(generator);
-    return EpsilonNFA(std::move(generator._pool), generator.start, generator.end);
+    return EpsilonNFA(generator);
 }
 
 EpsilonNFA& EpsilonNFA::combine_regex(const shared_ptr<IRegex>& regex, const string& matchName)

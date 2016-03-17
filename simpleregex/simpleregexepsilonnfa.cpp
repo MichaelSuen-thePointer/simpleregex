@@ -79,7 +79,7 @@ EpsilonNFA EpsilonNFA::generate(Regex& regex, const string& matchName)
 {
     NFAGenerator generator(matchName);
     regex.regex()->accept(generator);
-    return EpsilonNFA(generator)
+    return EpsilonNFA(generator);
 }
 
 EpsilonNFA EpsilonNFA::generate(const shared_ptr<IRegex>& regex, const string& matchName)

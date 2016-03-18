@@ -89,17 +89,24 @@ EpsilonNFA EpsilonNFA::generate(const shared_ptr<IRegex>& regex, const string& m
     return EpsilonNFA(generator);
 }
 
-EpsilonNFA& EpsilonNFA::combine_regex(const shared_ptr<IRegex>& regex, const string& matchName)
+EpsilonNFA& EpsilonNFA::combine_regex(IRegex* regex, const string& matchName)
 {
     NFAGenerator generator(matchName);
     regex->accept(generator);
-    
+
     using iter_type = decltype(_pool)::iterator;
     _pool.insert(_pool.end(),
                  std::move_iterator<iter_type>(generator._pool.begin()),
                  std::move_iterator<iter_type>(generator._pool.end()));
 
-    _startState->edges.push_back(Edge{'\0', generator.start});
+    if (_startState == nullptr)
+    {
+        _startState = generator.start;
+    }
+    else
+    {
+        _startState->edges.push_back(Edge{'\0', generator.start});
+    }
     _endStates.push_back(generator.end);
     return *this;
 }
@@ -107,7 +114,12 @@ EpsilonNFA& EpsilonNFA::combine_regex(const shared_ptr<IRegex>& regex, const str
 EpsilonNFA& EpsilonNFA::combine_regex(const string& regex, const string& matchName)
 {
     RegexParser parser(regex);
-    return combine_regex(parser.parse(), matchName);
+    return combine_regex(parser.parse().get(), matchName);
+}
+
+EpsilonNFA& EpsilonNFA::combine_regex(Regex& regex, const string & matchName)
+{
+    return combine_regex(regex.regex(), matchName);
 }
 
 }

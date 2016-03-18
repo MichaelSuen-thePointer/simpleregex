@@ -31,7 +31,7 @@ public:
         _start = dfa.second;
     }
 
-    const vector<unique_ptr<Node>> node_pool() const { return _pool; }
+    const vector<unique_ptr<Node>>& node_pool() const { return _pool; }
     
     Node* start() { return _start; }
     const Node* start() const { return _start; }

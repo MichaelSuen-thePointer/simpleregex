@@ -6,11 +6,34 @@
 #include <stdexcept>
 #include <initializer_list>
 #include <sstream>
-
+#include <iostream>
+#include <iomanip>
+#include <functional>
+#define O(msg) std::cout << std::setw(depth) << ">" << msg
+#define N std::endl
+#define OO(msg) scope_guard __x([](){depth++;}, [](){ O(msg) << N;depth--;})
 namespace pl
 {
 namespace regex
 {
+extern int depth;
+struct scope_guard
+{
+    std::function<void()> _ctor, _dtor;
+    scope_guard(std::function<void()> ctor, std::function<void()> dtor)
+        : _ctor(ctor)
+        , _dtor(dtor)
+    {
+        _ctor();
+    }
+    ~scope_guard()
+    {
+        _dtor();
+    }
+};
+
+
+
 using std::shared_ptr;
 using std::string;
 
@@ -99,7 +122,6 @@ protected:
             _prefetch = END;
         }
     }
-
 
 public:
     enum TokenType: int
@@ -195,50 +217,60 @@ private:
 
     unique_ptr<IRegex> parse_char()
     {
+        OO("return char");
         unique_ptr<IRegex> result;
         int token = _token_stream.get();
         if (Token::is_char(token))
         {
+            O("char: ") << (char)token << N;
             result = std::make_unique<Char>(token);
         }
         else if (token == Token::LBRACE)
         {
+            O("lbrace") << N;
             result = parse_expr();
             expect(_token_stream.get(), Token::RBRACE);
+            O("rbrace") << N;
         }
         token = _token_stream.peek();
         if (token == Token::STAR)
         {
+            O("star") << N;
             _token_stream.get();
             result = std::make_unique<Kleene>(result.release());
         }
         return result;
     }
 
-    unique_ptr<IRegex> parse_or_term()
+    unique_ptr<IRegex> parse_concat_term()
     {
+        OO("return concat");
+        O("parse concat") << N;
         unique_ptr<IRegex> result;
         int token;
         result = parse_char();
         token = _token_stream.peek();
-        if (token == Token::OR)
+        if (Token::is_char(token) || token == Token::LBRACE)
         {
-            _token_stream.get();
-            auto another = parse_or_term();
-            result = std::make_unique<Or>(result.release(), another.release());
+            auto another = parse_concat_term();
+            result = std::make_unique<Concat>(result.release(), another.release());
         }
         return result;
     }
 
-    unique_ptr<IRegex> parse_concat_term()
+    unique_ptr<IRegex> parse_or_term()
     {
+        OO("return or");
+        O("parse or") << N;
         unique_ptr<IRegex> result;
-        result = parse_or_term();
+        result = parse_concat_term();
         int token = _token_stream.peek();
-        if (Token::is_char(token))
+        if (token == Token::OR)
         {
-            auto another = parse_concat_term();
-            result = std::make_unique<Concat>(result.release(), another.release());
+            O("or") << N;
+            _token_stream.get();
+            auto another = parse_or_term();
+            result = std::make_unique<Or>(result.release(), another.release());
         }
         else if (token != Token::END && token != Token::RBRACE)
         {
@@ -249,9 +281,11 @@ private:
 
     unique_ptr<IRegex> parse_expr()
     {
+        OO("return expr");
+        O("parse expr") << N;
         if (_token_stream.peek() != Token::END)
         {
-            return parse_concat_term();
+            return parse_or_term();
         }
         return std::make_unique<Empty>();
     }

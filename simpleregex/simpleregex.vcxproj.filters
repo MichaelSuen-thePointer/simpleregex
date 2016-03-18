@@ -33,6 +33,12 @@
     <ClCompile Include="simpleregexdfa.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="simpleregexparser.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="simpleregexfsm.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="simpleregexdecl.h">
@@ -63,6 +69,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="simpleregexfsm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="tokenizergenerator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="simplelex.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

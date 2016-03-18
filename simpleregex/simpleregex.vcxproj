@@ -151,11 +151,14 @@
     <ClCompile Include="simpleregexdecl.cpp" />
     <ClCompile Include="simpleregexdfa.cpp" />
     <ClCompile Include="simpleregexepsilonnfa.cpp" />
+    <ClCompile Include="simpleregexfsm.cpp" />
     <ClCompile Include="simpleregexnfa.cpp" />
+    <ClCompile Include="simpleregexparser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="automationbase.h" />
     <ClInclude Include="distinct_queue.h" />
+    <ClInclude Include="simplelex.h" />
     <ClInclude Include="simpleregex.h" />
     <ClInclude Include="simpleregexautomationnode.h" />
     <ClInclude Include="simpleregexdecl.h" />
@@ -164,6 +167,7 @@
     <ClInclude Include="simpleregexnfa.h" />
     <ClInclude Include="simpleregexparser.h" />
     <ClInclude Include="simpleregexepsilonnfa.h" />
+    <ClInclude Include="tokenizergenerator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

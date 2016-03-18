@@ -61,6 +61,12 @@ private:
     {
     }
 public:
+    EpsilonNFA()
+        : _pool()
+        , _startState()
+        , _endStates()
+    {
+    }
     EpsilonNFA(Regex& regex, const string& matchName)
         : _pool()
         , _startState()
@@ -79,8 +85,9 @@ public:
     Node* start_state() const { return _startState; }
     const vector<Node*>& end_states() const { return _endStates; }
 
-    EpsilonNFA& combine_regex(const shared_ptr<IRegex>& regex, const string& matchName);
+    EpsilonNFA& combine_regex(IRegex* regex, const string& matchName);
     EpsilonNFA& combine_regex(const string& regex, const string& matchName);
+    EpsilonNFA& combine_regex(Regex& regex, const string& matchName);
 };
 
 

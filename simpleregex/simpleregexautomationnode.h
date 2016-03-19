@@ -16,21 +16,43 @@ using std::weak_ptr;
 using std::vector;
 using std::string;
 
+struct StateInfo
+{
+    int label;
+    string name;
+    StateInfo(int _label = -1, string _name = "")
+        : label(_label)
+        , name(_name)
+    {
+    }
+};
+
 struct Node;
 struct Edge
 {
     char accept;
     Node* next;
 };
+
 struct Node
 {
     vector<Edge> edges;
-    string stateName;
-    Node(const string& name = string())
-        : stateName(name)
+    StateInfo stateInfo;
+    enum
+    {
+        NOT_END_STATE = -1
+    };
+    Node(int label = NOT_END_STATE, const string& name = string())
+        : stateInfo(label, name)
+    {
+    }
+    Node(const StateInfo& info)
+        : stateInfo(info)
     {
     }
 };
+
+
 
 }
 }

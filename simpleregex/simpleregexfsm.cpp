@@ -5,12 +5,12 @@ namespace regex
 {
 
 tuple<vector<array<int, 256>>,
-      map<int, vector<string>>,
+      map<int, StateInfo>,
       int>
 FSM::generate(const DFA & dfa)
 {
     vector<array<int, 256>> _stateMachine(dfa.node_pool().size() + 1, array<int, 256>());
-    map<int, vector<string>> _endState;
+    map<int, StateInfo> _endState;
     map<const Node*, int> nodeSet;
     nodeSet[dfa.start()] = 0;
 
@@ -31,10 +31,9 @@ FSM::generate(const DFA & dfa)
         {
             _stateMachine[stateLabel][edge.accept] = nodeSet[edge.next];
         }
-        if (node->stateName != "")
+        if (node->stateInfo.label != Node::NOT_END_STATE)
         {
-            _endState[nodeSet[node.get()]].assign(std::istream_iterator<string>(std::istringstream(node->stateName)),
-                                                  std::istream_iterator<string>());
+            _endState[nodeSet[node.get()]] = node->stateInfo;
         }
     }
 

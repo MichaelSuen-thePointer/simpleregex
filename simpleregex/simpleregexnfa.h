@@ -46,7 +46,7 @@ private:
     };
 
     distinct_queue<state_pair, state_pair_equal> _matchStates;
-    vector<string> _results;
+    vector<StateInfo> _results;
 
     void clear_states()
     {
@@ -68,9 +68,9 @@ public:
 
     static pair<vector<unique_ptr<Node>>, Node*> generate(const EpsilonNFA& enfa);
 
-    vector<string> match_all(const string& text);
+    vector<StateInfo> match_all(const string& text);
 
-    string match_first(const string& text);
+    StateInfo match_first(const string& text);
 
     bool can_match()
     {
@@ -86,7 +86,7 @@ public:
             Node* current = toVisit.front();
             
             os << current << "\t";
-            os << (current->stateName.size() ? current->stateName : "\t" ) << "\n";
+            os << (current->stateInfo.name.length() ? current->stateInfo.name : "\t" ) << "\n";
 
             visited[current] = true;
             for (const auto& edge : current->edges)

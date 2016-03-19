@@ -253,7 +253,7 @@ public:
         EpsilonNFA eNfa;
         reader.read_file(fileAddr);
         enumEntry.insert(enumEntry.end(), reader.rules().size() + 1, string());
-        enumEntry[0] = "End";
+        enumEntry[0] = "END";
         for (auto& entry : reader.rules())
         {
             eNfa.combine_regex(entry.regex, StateInfo(entry.label, entry.name));

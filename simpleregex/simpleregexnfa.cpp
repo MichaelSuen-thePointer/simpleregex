@@ -72,9 +72,9 @@ bool NFA::unguarded_match(const string & text)
     const auto& current = _matchStates.front();
     if (current.second == text.end())
     {
-        if (current.first->stateName != "")
+        if (current.first->stateInfo.label != Node::NOT_END_STATE)
         {
-            _results.push_back(current.first->stateName);
+            _results.push_back(current.first->stateInfo);
             return true;
         }
     }
@@ -107,7 +107,7 @@ pair<vector<unique_ptr<Node>>, Node*> NFA::generate(const EpsilonNFA & enfa)
     {
         if (old2new.find(state) == old2new.end())
         {
-            pool.push_back(std::make_unique<Node>(state->stateName));
+            pool.push_back(std::make_unique<Node>(state->stateInfo));
             old2new[state] = pool.back().get();
         }
         auto eClosure = find_epsilon_closure(state);
@@ -120,7 +120,7 @@ pair<vector<unique_ptr<Node>>, Node*> NFA::generate(const EpsilonNFA & enfa)
                     auto next = edge.next;
                     if (old2new.find(next) == old2new.end())
                     {
-                        pool.push_back(std::make_unique<Node>(next->stateName));
+                        pool.push_back(std::make_unique<Node>(next->stateInfo));
                         old2new[next] = pool.back().get();
                     }
                     old2new[state]->edges.push_back(Edge{edge.accept, old2new[next]});
@@ -132,20 +132,19 @@ pair<vector<unique_ptr<Node>>, Node*> NFA::generate(const EpsilonNFA & enfa)
     return std::make_pair(std::move(pool), start);
 }
 
-vector<string> NFA::match_all(const string & text)
+vector<StateInfo> NFA::match_all(const string & text)
 {
-    vector<string> results;
-
     _matchStates.push({_start, text.begin()});
 
     while (can_match())
     {
         unguarded_match(text);
     }
-    return results;
+
+    return _results;
 }
 
-string NFA::match_first(const string & text)
+StateInfo NFA::match_first(const string & text)
 {
     _matchStates.push({_start, text.begin()});
 
@@ -157,11 +156,11 @@ string NFA::match_first(const string & text)
         }
     }
 
-    if (_results.size() > 0)
+    if (_results.size())
     {
-        return _results.back();
+    return _results.front();
     }
-    return "";
+    return StateInfo();
 }
 
 }

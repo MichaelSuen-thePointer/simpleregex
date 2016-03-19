@@ -14,7 +14,7 @@ pair<vector<unique_ptr<Node>>, Node*> DFA::generate(const NFA & nfa)
     Node* start;
 
     nodeQueue.push({nfa.start()});
-    newNodePool.push_back(std::make_unique<Node>(nfa.start()->stateName));
+    newNodePool.push_back(std::make_unique<Node>(nfa.start()->stateInfo));
     nodeSet2New[nodeQueue.front()] = newNodePool.back().get();
     start = newNodePool.back().get();
 
@@ -40,13 +40,14 @@ pair<vector<unique_ptr<Node>>, Node*> DFA::generate(const NFA & nfa)
             auto& nodeTo = edge.second;
             if (nodeSet2New.find(nodeTo) == nodeSet2New.end())
             {
-                string stateName;
+                StateInfo stateName;
                 std::for_each(nodeTo.begin(), nodeTo.end(), [&stateName](auto elm) {
-                    if (stateName.size())
+                    if (elm->stateInfo.label != Node::NOT_END_STATE &&
+                        stateName.label != Node::NOT_END_STATE)
                     {
-                        stateName.append(" ");
+                        throw std::runtime_error("ambigus state");
                     }
-                    stateName.append(elm->stateName);
+                    stateName = elm->stateInfo;
                 });
                 newNodePool.push_back(std::make_unique<Node>(stateName));
                 nodeSet2New[nodeTo] = newNodePool.back().get();

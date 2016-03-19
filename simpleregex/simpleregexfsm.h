@@ -26,12 +26,12 @@ class FSM
 {
 protected:
     vector<array<int, 256>> _stateMachine;
-    map<int, vector<string>> _endState;
+    map<int, StateInfo> _endState;
     int _invalidState;
 
     static tuple<vector<array<int, 256>>,
-        map<int, vector<string>>,
-        int>
+                 map<int, StateInfo>,
+                 int>
         generate(const DFA& dfa);
 public:
     FSM()
@@ -102,27 +102,27 @@ public:
         for (auto& pair : _endState)
         {
             os << std::setw(3) << pair.first << ": ";
-            std::copy(pair.second.begin(), pair.second.end(), std::ostream_iterator<string>(os, " "));
+            os << pair.second.label << ' ' << pair.second.name;
             os << '\n';
         }
     }
 #endif //_DEBUG
 
     int state_count() { return _stateMachine.size(); }
-    const vector<array<int, 256>>& state_machine(){return _stateMachine; }
+    const vector<array<int, 256>>& state_machine() {return _stateMachine; }
     int invalid_state() { return _invalidState; }
-
-    string try_end_state(int state)
+    const map<int, StateInfo>& end_states() { return _endState; }
+    StateInfo try_end_state(int state)
     {
         auto place = _endState.find(state);
         if (place == _endState.end())
         {
-            return "";
+            return StateInfo();
         }
-        return place->second.front();
+        return place->second;
     }
 
-    vector<string> match(const string& text)
+    StateInfo match(const string& text)
     {
         int lastState = 0;
 
@@ -139,7 +139,7 @@ public:
                 return _endState[lastState];
             }
         }
-        return vector<string>();
+        return StateInfo();
     }
 };
 

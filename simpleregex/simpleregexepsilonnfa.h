@@ -25,7 +25,7 @@ private:
         Node* start;
         Node* end;
     private:
-        string _name;
+        StateInfo _info;
         virtual void visit(Empty&) override;
         virtual void visit(Char&) override;
         virtual void visit(Concat&) override;
@@ -34,11 +34,11 @@ private:
 
         void adopt_pool(vector<unique_ptr<Node>>& rhs);
     public:
-        NFAGenerator(const string& name = string())
+        NFAGenerator(const StateInfo& info = StateInfo())
             : _pool()
             , start()
             , end()
-            , _name(name)
+            , _info(info)
         {
             _pool.push_back(std::make_unique<Node>());
             start = _pool.front().get();
@@ -67,7 +67,7 @@ public:
         , _endStates()
     {
     }
-    EpsilonNFA(Regex& regex, const string& matchName)
+    EpsilonNFA(Regex& regex, const StateInfo& matchName)
         : _pool()
         , _startState()
         , _endStates()
@@ -79,15 +79,15 @@ public:
         _endStates.push_back(generator.end);
     }
 
-    static EpsilonNFA generate(Regex& regex, const string& matchName);
-    static EpsilonNFA generate(const shared_ptr<IRegex>& regex, const string& matchName);
+    static EpsilonNFA generate(Regex& regex, const StateInfo& matchName);
+    static EpsilonNFA generate(const shared_ptr<IRegex>& regex, const StateInfo& matchName);
 
     Node* start_state() const { return _startState; }
     const vector<Node*>& end_states() const { return _endStates; }
 
-    EpsilonNFA& combine_regex(IRegex* regex, const string& matchName);
-    EpsilonNFA& combine_regex(const string& regex, const string& matchName);
-    EpsilonNFA& combine_regex(Regex& regex, const string& matchName);
+    EpsilonNFA& combine_regex(IRegex* regex, const StateInfo& matchName);
+    EpsilonNFA& combine_regex(const string& regex, const StateInfo& matchName);
+    EpsilonNFA& combine_regex(Regex& regex, const StateInfo& matchName);
 };
 
 

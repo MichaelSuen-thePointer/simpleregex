@@ -14,11 +14,6 @@ namespace pl
 using std::string;
 using std::vector;
 
-string operator""_s(const char* str, size_t)
-{
-    return string(str);
-}
-
 class ParseError: public std::runtime_error
 {
 public:
@@ -98,7 +93,7 @@ public:
             auto ruleName = tokenizer.get();
             expect(ruleName, tokenizer.Regex, "a name");
 
-            _rules.push_back(Rule{label, regex.content, ruleName.content});
+            _rules.push_back(Rule{label, ruleName.content, regex.content});
             label++;
         }
     }

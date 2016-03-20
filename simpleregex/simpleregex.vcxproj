@@ -161,7 +161,6 @@
     <ClInclude Include="distinct_queue.h" />
     <ClInclude Include="lexfilereader.h" />
     <ClInclude Include="LexReaderTokenizer.h" />
-    <ClInclude Include="simplelex.h" />
     <ClInclude Include="simpleregex.h" />
     <ClInclude Include="simpleregexautomationnode.h" />
     <ClInclude Include="simpleregexdecl.h" />

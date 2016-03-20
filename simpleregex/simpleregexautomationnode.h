@@ -20,10 +20,14 @@ struct StateInfo
 {
     int label;
     string name;
-    StateInfo(int _label = -1, string _name = "")
+    explicit StateInfo(int _label = -1, string _name = "")
         : label(_label)
         , name(_name)
     {
+    }
+    bool is_end_state() const
+    {
+        return label != -1 && name.size() > 0;
     }
 };
 

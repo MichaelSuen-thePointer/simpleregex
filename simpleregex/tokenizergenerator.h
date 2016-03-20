@@ -66,7 +66,7 @@ protected:
         file << "protected:" << "\n";
         file << "    static int _stateMachine[" << fsm.state_count() << "][256];\n";
         file << "    static int _invalidState;\n";
-        file << "    static std::map<int, int> _endStates;\n";
+        file << "    static int _endStates[" << fsm.end_states().size() << "];\n";
         file << "    static int _dropState;\n";
         file << "    int _lastState;\n";
         file << "    int _line, _column;\n";
@@ -95,7 +95,7 @@ protected:
             file << "        " << enumEntry[i] << " = " << i << ",\n";
         }
         file.seekp(-2, file.cur);
-        file << "\n   };\n";
+        file << "\n    };\n";
     }
     void output_token_structure(std::ofstream& file)
     {
@@ -164,14 +164,13 @@ struct StateInfo
         file << "int " << get_class_name() << "::_invalidState = " << fsm.invalid_state() << ";\n";
         file << "int " << get_class_name() << "::_dropState = " << fsm.drop_state() << ";\n";
 
-        file << "std::map<int, int> " << get_class_name() << "::_endStates =\n";
-        file << "{\n";
-        for (auto& pair : fsm.end_states())
+        file << "int " << get_class_name() << "::_endStates[" << fsm.end_states().size() << "] = {";
+        for (auto& state : fsm.end_states())
         {
-            file << "{" << pair.first << ", " << pair.second.label << "},\n";
+            file << state.label << ", ";
         }
-        file.seekp(-3, file.cur);
-        file << "\n};\n";
+        file.seekp(-2, file.cur);
+        file << "};\n";
     }
     void output_cpp_member_function(std::ofstream& file)
     {
@@ -188,7 +187,7 @@ struct StateInfo
     while (!_file.eof())
     {
         char ch = _file.peek();
-        
+
         if (_stateMachine[_lastState][ch] != _invalidState)
         {
             _file.get();
@@ -210,7 +209,7 @@ struct StateInfo
         }
         else
         {
-            if (_endStates.find(_lastState) == _endStates.end())
+            if (_endStates[_lastState] == -1)
             {
                 throw BadToken(matched, _line, static_cast<int>(_column + 1 - matched.length()));
             }

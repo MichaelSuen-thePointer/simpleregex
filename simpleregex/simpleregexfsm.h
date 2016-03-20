@@ -26,12 +26,12 @@ class FSM
 {
 protected:
     vector<array<int, 256>> _stateMachine;
-    map<int, StateInfo> _endStates;
+    vector<StateInfo> _endStates;
     int _dropState;
     int _invalidState;
 
     static tuple<vector<array<int, 256>>,
-        map<int, StateInfo>,
+        vector<StateInfo>,
         int>
         generate(const DFA& dfa);
 public:
@@ -100,10 +100,10 @@ public:
             }
             os << '\n';
         }
-        for (auto& pair : _endStates)
+        for (auto iter = _endStates.begin(); iter != _endStates.end(); ++iter)
         {
-            os << std::setw(3) << pair.first << ": ";
-            os << pair.second.label << ' ' << pair.second.name;
+            os << std::setw(3) << iter - _endStates.begin() << ": ";
+            os << iter->label << ' ' << iter->name;
             os << '\n';
         }
     }
@@ -112,29 +112,19 @@ public:
     int state_count() { return _stateMachine.size(); }
     const vector<array<int, 256>>& state_machine() { return _stateMachine; }
     int invalid_state() { return _invalidState; }
-    const map<int, StateInfo>& end_states() { return _endStates; }
+    const vector<StateInfo>& end_states() { return _endStates; }
     int drop_state() { return _dropState; }
     void set_drop_state(const string& stateName)
     {
         for (auto iter = _endStates.begin(); iter != _endStates.end(); ++iter)
         {
-            if (iter->second.name == stateName)
+            if (iter->name == stateName)
             {
-                _dropState = iter->first;
+                _dropState = iter - _endStates.begin();
                 return;
             }
         }
         _dropState = -1;
-    }
-
-    StateInfo try_end_state(int state)
-    {
-        auto place = _endStates.find(state);
-        if (place == _endStates.end())
-        {
-            return StateInfo();
-        }
-        return place->second;
     }
 
     StateInfo match(const string& text)
@@ -149,7 +139,7 @@ public:
         }
         if (toMatch == text.end())
         {
-            if (_endStates.find(lastState) != _endStates.end())
+            if (_endStates[lastState].is_end_state())
             {
                 return _endStates[lastState];
             }

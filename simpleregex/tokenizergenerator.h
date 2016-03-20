@@ -188,7 +188,7 @@ struct StateInfo
     {
         char ch = _file.peek();
 
-                    if (_stateMachine[_lastState][ch] != _invalidState)
+        if (_stateMachine[_lastState][ch] != _invalidState)
         {
             _file.get();
             _lastState = _stateMachine[_lastState][ch];

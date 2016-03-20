@@ -79,10 +79,8 @@ public:
         while (tokenizer.peek().kind != tokenizer.End)
         {
             auto regex = tokenizer.get();
-            expect(regex, tokenizer.Regex, "regex");
             expect(tokenizer.get(), tokenizer.Colon, ":");
             auto ruleName = tokenizer.get();
-            expect(ruleName, tokenizer.Regex, "a name");
 
             _rules.push_back(Rule{label, ruleName.content, regex.content});
             label++;

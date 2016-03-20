@@ -35,7 +35,6 @@ public:
 protected:
     string _className;
     string _classNameUpperCase;
-    char _delimiter;
     vector<Rule> _rules;
 
     void expect(LexReaderTokenizer::Token& token, const LexReaderTokenizer::TokenKind kind, const string& description)
@@ -65,14 +64,6 @@ public:
                 _className = token.content;
                 _classNameUpperCase = _className;
                 std::transform(_className.begin(), _className.end(), _classNameUpperCase.begin(), [](char ch) {return ::toupper(ch); });
-            }
-            if (token.kind == tokenizer.Delimiter)
-            {
-                token = tokenizer.get();
-                expect(token, tokenizer.Colon, ":");
-                token = tokenizer.get();
-                expect(token, tokenizer.Regex, "a delimiter");
-                _delimiter = token.content[0];
             }
             if (token.kind == tokenizer.Rules)
             {

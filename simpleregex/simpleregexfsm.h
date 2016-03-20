@@ -26,12 +26,13 @@ class FSM
 {
 protected:
     vector<array<int, 256>> _stateMachine;
-    map<int, StateInfo> _endState;
+    map<int, StateInfo> _endStates;
+    int _dropState;
     int _invalidState;
 
     static tuple<vector<array<int, 256>>,
-                 map<int, StateInfo>,
-                 int>
+        map<int, StateInfo>,
+        int>
         generate(const DFA& dfa);
 public:
     FSM()
@@ -39,37 +40,37 @@ public:
     }
     FSM(const DFA& dfa)
         : _stateMachine()
-        , _endState()
+        , _endStates()
         , _invalidState()
     {
         auto paramPack = generate(dfa);
         _stateMachine = std::move(std::get<0>(paramPack));
-        _endState = std::move(std::get<1>(paramPack));
+        _endStates = std::move(std::get<1>(paramPack));
         _invalidState = std::get<2>(paramPack);
     }
     FSM(const FSM& fsm)
         : _stateMachine(fsm._stateMachine)
-        , _endState(fsm._endState)
+        , _endStates(fsm._endStates)
         , _invalidState(fsm._invalidState)
     {
     }
     FSM(const FSM&& fsm)
         : _stateMachine(std::move(fsm._stateMachine))
-        , _endState(std::move(fsm._endState))
+        , _endStates(std::move(fsm._endStates))
         , _invalidState(fsm._invalidState)
     {
     }
     FSM& operator=(const FSM& fsm)
     {
         _stateMachine = fsm._stateMachine;
-        _endState = fsm._endState;
+        _endStates = fsm._endStates;
         _invalidState = fsm._invalidState;
         return *this;
     }
     FSM& operator=(FSM&& fsm)
     {
         _stateMachine = std::move(fsm._stateMachine);
-        _endState = std::move(fsm._endState);
+        _endStates = std::move(fsm._endStates);
         _invalidState = fsm._invalidState;
         return *this;
     }
@@ -99,7 +100,7 @@ public:
             }
             os << '\n';
         }
-        for (auto& pair : _endState)
+        for (auto& pair : _endStates)
         {
             os << std::setw(3) << pair.first << ": ";
             os << pair.second.label << ' ' << pair.second.name;
@@ -109,13 +110,27 @@ public:
 #endif //_DEBUG
 
     int state_count() { return _stateMachine.size(); }
-    const vector<array<int, 256>>& state_machine() {return _stateMachine; }
+    const vector<array<int, 256>>& state_machine() { return _stateMachine; }
     int invalid_state() { return _invalidState; }
-    const map<int, StateInfo>& end_states() { return _endState; }
+    const map<int, StateInfo>& end_states() { return _endStates; }
+    int drop_state() { return _dropState; }
+    void set_drop_state(const string& stateName)
+    {
+        for (auto iter = _endStates.begin(); iter != _endStates.end(); ++iter)
+        {
+            if (iter->second.name == stateName)
+            {
+                _dropState = iter->first;
+                return;
+            }
+        }
+        _dropState = -1;
+    }
+
     StateInfo try_end_state(int state)
     {
-        auto place = _endState.find(state);
-        if (place == _endState.end())
+        auto place = _endStates.find(state);
+        if (place == _endStates.end())
         {
             return StateInfo();
         }
@@ -134,9 +149,9 @@ public:
         }
         if (toMatch == text.end())
         {
-            if (_endState.find(lastState) != _endState.end())
+            if (_endStates.find(lastState) != _endStates.end())
             {
-                return _endState[lastState];
+                return _endStates[lastState];
             }
         }
         return StateInfo();

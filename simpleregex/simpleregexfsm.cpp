@@ -31,7 +31,7 @@ FSM::generate(const DFA & dfa)
         {
             _stateMachine[stateLabel][edge.accept] = nodeSet[edge.next];
         }
-        if (node->stateInfo.label != Node::NOT_END_STATE)
+        if (node->stateInfo.label != Node::MIDDLE_STATE)
         {
             _endState[nodeSet[node.get()]] = node->stateInfo;
         }

@@ -56,7 +56,7 @@ protected:
         output_exception_structure(file);
         output_state_info_structure(file);
 
-        file << "class " << get_class_name();
+        file << "class " << get_class_name() << "\n";
         file << "{" << "\n";
         file << "public:\n";
         
@@ -67,13 +67,15 @@ protected:
         file << "    static int _stateMachine[" << fsm.state_count() << "][256];\n";
         file << "    static int _invalidState;\n";
         file << "    static std::map<int, int> _endStates;\n";
+        file << "    static int _dropState;\n";
         file << "    int _lastState;\n";
         file << "    int _line, _column;\n";
         file << "    std::ifstream _file;\n";
         file << "    Token _prefetch;\n";
         file << "public:\n";
         file << "    " << get_class_name() << "(const std::string& file)\n";
-        file << "    : _file(file)\n";
+        file << "        : _file(file)\n";
+        file << "        , _line(1)\n";
         file << "    {\n";
         file << "        prefetch();\n";
         file << "    }\n";
@@ -160,6 +162,7 @@ struct StateInfo
         file << "\n};\n";
 
         file << "int " << get_class_name() << "::_invalidState = " << fsm.invalid_state() << ";\n";
+        file << "int " << get_class_name() << "::_dropState = " << fsm.drop_state() << ";\n";
 
         file << "std::map<int, int> " << get_class_name() << "::_endStates =\n";
         file << "{\n";
@@ -182,20 +185,24 @@ struct StateInfo
         file << R"__(
 {
     std::string matched;
-    while (_file)
+    while (!_file.eof())
     {
         char ch = _file.peek();
-        if (ch == '\n')
-        {
-            _column++;
-            _line = 0;
-            continue;
-        }
-        _line++;
+        
         if (_stateMachine[_lastState][ch] != _invalidState)
         {
+            _file.get();
             _lastState = _stateMachine[_lastState][ch];
             matched.push_back(ch);
+            if (ch == '\n')
+            {
+                _line++;
+                _column = 0;
+            }
+            else
+            {
+                _column++;
+            }
         }
         else if (matched.length() == 0)
         {
@@ -203,14 +210,19 @@ struct StateInfo
         }
         else
         {
-            if(_endStates.find(_lastState) == _endStates.end())
+            if (_endStates.find(_lastState) == _endStates.end())
             {
-                throw BadToken(matched, _line, _column);
+                throw BadToken(matched, _line, static_cast<int>(_column + 1 - matched.length()));
             }
-            _lastState = 0;
-            _file.get();
+            if (_endStates[_lastState] == _dropState)
+            {
+                _lastState = 0;
+                matched.clear();
+                continue;
+            }
             int kind = _endStates[_lastState];
-            _prefetch = Token{TokenKind(kind), matched, _line, _column};
+            _lastState = 0;
+            _prefetch = Token{TokenKind(kind), matched, _line, static_cast<int>(_column + 1 - matched.length())};
             return;
         }
     }
@@ -253,13 +265,14 @@ public:
         EpsilonNFA eNfa;
         reader.read_file(fileAddr);
         enumEntry.insert(enumEntry.end(), reader.rules().size() + 1, string());
-        enumEntry[0] = "END";
+        enumEntry[0] = "End";
         for (auto& entry : reader.rules())
         {
             eNfa.combine_regex(entry.regex, StateInfo(entry.label, entry.name));
             enumEntry[entry.label] = entry.name;
         }
         fsm = FSM(DFA(NFA(eNfa)));
+        fsm.set_drop_state("DROP");
     }
     void generate_file()
     {

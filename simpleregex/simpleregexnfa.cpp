@@ -47,7 +47,7 @@ inline set<const Node*> NFA::find_epsilon_closure(const Node * node)
 
     toVisit.push(node);
     closure.insert(node);
-    
+
     while (toVisit.size())
     {
         const Node* current = toVisit.front();
@@ -72,7 +72,7 @@ bool NFA::unguarded_match(const string & text)
     const auto& current = _matchStates.front();
     if (current.second == text.end())
     {
-        if (current.first->stateInfo.label != Node::NOT_END_STATE)
+        if (current.first->stateInfo.label != Node::MIDDLE_STATE)
         {
             _results.push_back(current.first->stateInfo);
             return true;
@@ -110,6 +110,7 @@ pair<vector<unique_ptr<Node>>, Node*> NFA::generate(const EpsilonNFA & enfa)
             pool.push_back(std::make_unique<Node>(state->stateInfo));
             old2new[state] = pool.back().get();
         }
+        auto newState = old2new[state];
         auto eClosure = find_epsilon_closure(state);
         for (auto node : eClosure)
         {
@@ -123,8 +124,15 @@ pair<vector<unique_ptr<Node>>, Node*> NFA::generate(const EpsilonNFA & enfa)
                         pool.push_back(std::make_unique<Node>(next->stateInfo));
                         old2new[next] = pool.back().get();
                     }
-                    old2new[state]->edges.push_back(Edge{edge.accept, old2new[next]});
+                    newState->edges.push_back(Edge{edge.accept, old2new[next]});
                 }
+            }
+            if ((newState->stateInfo.label == Node::MIDDLE_STATE &&
+                 node->stateInfo.label != Node::MIDDLE_STATE) ||
+                (node->stateInfo.label != Node::MIDDLE_STATE &&
+                 newState->stateInfo.label > node->stateInfo.label))
+            {
+                newState->stateInfo = node->stateInfo;
             }
         }
     }
@@ -158,7 +166,7 @@ StateInfo NFA::match_first(const string & text)
 
     if (_results.size())
     {
-    return _results.front();
+        return _results.front();
     }
     return StateInfo();
 }

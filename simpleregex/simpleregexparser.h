@@ -83,7 +83,7 @@ protected:
         if (ch == '\\')
         {
             ch = _stream.get();
-            if (ch == '*' || ch == '|' || ch == '(' || ch == ')' || ch == '\\')
+            if (ch == '*' || ch == '|' || ch == '(' || ch == ')' || ch == '\\' || ch == ' ' || ch == ':')
             {
                 return ch;
             }
@@ -94,10 +94,6 @@ protected:
             if (ch == 'n')
             {
                 return '\n';
-            }
-            if (ch == ' ')
-            {
-                return ' ';
             }
             else
             {

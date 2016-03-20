@@ -83,7 +83,7 @@ protected:
         if (ch == '\\')
         {
             ch = _stream.get();
-            if (ch == '*' || ch == '|' || ch == '(' || ch == ')' || ch == '\\')
+            if (ch == '*' || ch == '|' || ch == '(' || ch == ')' || ch == '\\' || ch == ':')
             {
                 return ch;
             }

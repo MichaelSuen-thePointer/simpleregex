@@ -40,9 +40,9 @@ struct Node
     StateInfo stateInfo;
     enum
     {
-        NOT_END_STATE = -1
+        MIDDLE_STATE = -1
     };
-    Node(int label = NOT_END_STATE, const string& name = string())
+    Node(int label = MIDDLE_STATE, const string& name = string())
         : stateInfo(label, name)
     {
     }

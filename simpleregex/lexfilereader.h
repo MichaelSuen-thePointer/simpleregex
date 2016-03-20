@@ -61,7 +61,7 @@ public:
                 _classNameUpperCase = lineBuf;
                 std::transform(_className.begin(), _className.end(), _classNameUpperCase.begin(), ::toupper);
             }
-            if (lineBuf == "Rules"_s)
+            else if (lineBuf == "Rules"_s)
             {
                 read_rules(lexFile);
                 return;
@@ -75,9 +75,15 @@ public:
 
         while (!lexFile.eof())
         {
-            lexFile.getline(lineBuf, bufsize, ':');
+            lexFile.getline(lineBuf, bufsize);
+            if (strlen(lineBuf) == 0)
+            {
+                continue;
+            }
+            std::istringstream sstream(lineBuf);
+            sstream.getline(lineBuf, bufsize, ':');
             string regex(lineBuf);
-            lexFile.getline(lineBuf, bufsize, '\n');
+            sstream.getline(lineBuf, bufsize);
             string name(lineBuf);
 
             _rules.push_back(Rule{static_cast<int>(_rules.size() + 1), name, regex});

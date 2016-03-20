@@ -83,6 +83,10 @@ protected:
             {
                 return '\n';
             }
+            if (ch == ' ')
+            {
+                return ' ';
+            }
             else
             {
                 throw BadToken("bad escaping character", ch);
@@ -172,7 +176,7 @@ public:
     {
         if (ch >= 0 && ch <= 255)
         {
-            return isprint(ch) != 0;
+            return isprint(ch) != 0 || ch == '\n' || ch == '\t';
         }
         return false;
     }

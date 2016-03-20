@@ -43,9 +43,8 @@ public:
         DROP = 1,
         ClassName = 2,
         Rules = 3,
-        Delimiter = 4,
+        Regex = 4,
         Colon = 5,
-        Regex = 6,
     };
     struct Token
     {
@@ -54,9 +53,9 @@ public:
         int line, column;
     };
 protected:
-    static int _stateMachine[96][256];
+    static int _stateMachine[112][256];
     static int _invalidState;
-    static int _endStates[95];
+    static int _endStates[111];
     static int _dropState;
     int _lastState;
     int _line, _column;

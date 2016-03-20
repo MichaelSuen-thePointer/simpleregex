@@ -81,7 +81,7 @@ public:
                 continue;
             }
             std::istringstream sstream(lineBuf);
-            sstream.getline(lineBuf, bufsize, ':');
+            sstream.getline(lineBuf, bufsize, '\t');
             string regex(lineBuf);
             sstream.getline(lineBuf, bufsize);
             string name(lineBuf);

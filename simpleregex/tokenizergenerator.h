@@ -26,7 +26,7 @@ protected:
     void output_header(std::ofstream& file)
     {
         output_preprocess_statement(file);
-        
+
         output_class_structure(file);
 
         output_preprocess_statement_end(file);
@@ -59,7 +59,7 @@ protected:
         file << "class " << get_class_name() << "\n";
         file << "{" << "\n";
         file << "public:\n";
-        
+
         output_enum_structure(file);
         output_token_structure(file);
 
@@ -180,7 +180,7 @@ struct StateInfo
     }
     void output_memfunc_prefetch(std::ofstream& file)
     {
-        file <<"void " <<  get_class_name() << "::prefetch()";
+        file << "void " << get_class_name() << "::prefetch()";
         file << R"__(
 {
     std::string matched;
@@ -188,7 +188,7 @@ struct StateInfo
     {
         char ch = _file.peek();
 
-        if (_stateMachine[_lastState][ch] != _invalidState)
+                    if (_stateMachine[_lastState][ch] != _invalidState)
         {
             _file.get();
             _lastState = _stateMachine[_lastState][ch];
@@ -262,7 +262,25 @@ public:
     Generator(const string& fileAddr)
     {
         EpsilonNFA eNfa;
-        reader.read_file(fileAddr);
+        try
+        {
+            reader.read_file(fileAddr);
+
+        }
+        catch (::BadToken bd)
+        {
+            std::cout << "bad token at line: " << bd.line << ", column: " << bd.column << ", with text: \'" << bd.content << "\'." << std::endl;
+            std::cout << "press any key";
+            std::cin.get();
+            throw;
+        }
+        catch (pl::ParseError pa)
+        {
+            std::cout << "parse error: " << pa.what() << std::endl;
+            std::cout << "press any key";
+            std::cin.get();
+            throw;
+        }
         enumEntry.insert(enumEntry.end(), reader.rules().size() + 1, string());
         enumEntry[0] = "End";
         for (auto& entry : reader.rules())

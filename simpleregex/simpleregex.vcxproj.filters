@@ -39,6 +39,9 @@
     <ClCompile Include="simpleregexfsm.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="LexReaderTokenizer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="simpleregexdecl.h">
@@ -78,6 +81,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="lexfilereader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LexReaderTokenizer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

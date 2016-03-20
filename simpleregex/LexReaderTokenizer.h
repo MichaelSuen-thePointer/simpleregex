@@ -40,11 +40,11 @@ public:
     enum TokenKind
     {
         End = 0,
-        DROP = 1,
-        ClassName = 2,
-        Rules = 3,
-        Regex = 4,
-        Colon = 5,
+         = 1,
+         = 2,
+         = 3,
+         = 4,
+         = 5,
     };
     struct Token
     {
@@ -53,9 +53,9 @@ public:
         int line, column;
     };
 protected:
-    static int _stateMachine[112][256];
+    static int _stateMachine[152][256];
     static int _invalidState;
-    static int _endStates[111];
+    static int _endStates[151];
     static int _dropState;
     int _lastState;
     int _line, _column;

@@ -171,6 +171,7 @@
     <ClInclude Include="simpleregexparser.h" />
     <ClInclude Include="simpleregexepsilonnfa.h" />
     <ClInclude Include="SimpleRegexTokenizer.h" />
+    <ClInclude Include="simpleregextokenstream.h" />
     <ClInclude Include="tokenizergenerator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

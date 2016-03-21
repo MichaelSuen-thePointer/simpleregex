@@ -6,23 +6,16 @@
 #include <stdexcept>
 #include <initializer_list>
 #include <sstream>
-#include <functional>
 
 #if defined _DEBUG
 
+#include <functional>
 #include <iostream>
 #include <iomanip>
 #define O(msg) std::cout << std::setw(depth) << ">" << msg
 #define N std::endl
 #define OO(msg) scope_guard __x([](){depth++;}, [](){ O(msg) << N;depth--;})
 
-#else
-
-#define O(x) /##/
-#define N /##/
-#define OO(x) /##/
-
-#endif
 
 namespace pl
 {
@@ -44,6 +37,18 @@ struct scope_guard
     }
 };
 
+#else
+
+#define O(x) /##/
+#define N /##/
+#define OO(x) /##/
+
+namespace pl
+{
+namespace regex
+{
+
+#endif
 
 
 using std::shared_ptr;

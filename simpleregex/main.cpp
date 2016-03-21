@@ -11,8 +11,16 @@ int main(int argc, char* argv[])
 {
     if (argc == 2)
     {
-        lex::Generator generator(argv[1]);
-        generator.generate_file();
+        try
+        {
+            lex::Generator generator(argv[1]);
+            generator.generate_file();
+        }
+        catch (...)
+        {
+            std::cout << "error occured." << "\n press any key\n";
+            std::cin.get();
+        }
     }
     else
     {

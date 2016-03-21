@@ -35,7 +35,6 @@ public:
 protected:
     string _className;
     string _classNameUpperCase;
-    string _streamType;
     vector<Rule> _rules;
 
     void expect(LexReaderTokenizer::Token& token, const LexReaderTokenizer::TokenKind kind, const string& description)
@@ -49,7 +48,7 @@ public:
     const string& class_name() { return _className; }
     const string& class_name_upper_case() { return _classNameUpperCase; }
     const vector<Rule>& rules() { return _rules; }
-    const string& stream_type() { return _streamType; }
+
     void read_file(const string& filePath)
     {
         LexReaderTokenizer tokenizer(filePath);
@@ -66,17 +65,11 @@ public:
                 _classNameUpperCase = _className;
                 std::transform(_className.begin(), _className.end(), _classNameUpperCase.begin(), [](char ch) {return ::toupper(ch); });
             }
-            else if (token.kind == tokenizer.Rules)
+            if (token.kind == tokenizer.Rules)
             {
                 token = tokenizer.get();
                 expect(token, tokenizer.Colon, ":");
                 read_rules(tokenizer);
-            }
-            else if (token.kind == tokenizer.StreamType)
-            {
-                expect(tokenizer.get(), tokenizer.Colon, ":");
-                token = tokenizer.get();
-                _streamType = token.content;
             }
         }
     }

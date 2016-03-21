@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
         }
         catch (...)
         {
-            std::cout << "error occured." << "\npress any key\n";
+            std::cout << "error occured." << "\n press any key\n";
             std::cin.get();
         }
     }

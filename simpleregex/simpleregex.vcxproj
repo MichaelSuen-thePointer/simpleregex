@@ -155,6 +155,7 @@
     <ClCompile Include="simpleregexfsm.cpp" />
     <ClCompile Include="simpleregexnfa.cpp" />
     <ClCompile Include="simpleregexparser.cpp" />
+    <ClCompile Include="SimpleRegexTokenizer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="automationbase.h" />
@@ -169,6 +170,7 @@
     <ClInclude Include="simpleregexnfa.h" />
     <ClInclude Include="simpleregexparser.h" />
     <ClInclude Include="simpleregexepsilonnfa.h" />
+    <ClInclude Include="SimpleRegexTokenizer.h" />
     <ClInclude Include="tokenizergenerator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

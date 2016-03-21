@@ -1,6 +1,6 @@
 #pragma once
-#ifndef LEXREADERTOKENIZER_H
-#define LEXREADERTOKENIZER_H
+#ifndef SIMPLEREGEXTOKENIZER_H
+#define SIMPLEREGEXTOKENIZER_H
 #include <fstream>
 #include <string>
 #include <map>
@@ -34,18 +34,17 @@ struct StateInfo
     {
     }
 };
-class LexReaderTokenizer
+class SimpleRegexTokenizer
 {
 public:
     enum TokenKind
     {
         End = 0,
-        DROP = 1,
-        ClassName = 2,
-        Rules = 3,
-        StreamType = 4,
-        Regex = 5,
-        Colon = 6,
+        LBrace = 1,
+        RBrace = 2,
+        Or = 3,
+        Star = 4,
+        Char = 5,
     };
     struct Token
     {
@@ -54,16 +53,16 @@ public:
         int line, column;
     };
 protected:
-    static int _stateMachine[123][256];
+    static int _stateMachine[103][256];
     static int _invalidState;
-    static int _endStates[122];
+    static int _endStates[102];
     static int _dropState;
     int _lastState;
     int _line, _column;
     std::ifstream _file;
     Token _prefetch;
 public:
-    LexReaderTokenizer(const std::string& file)
+    SimpleRegexTokenizer(const std::string& file)
         : _file(file)
         , _line(1)
     {

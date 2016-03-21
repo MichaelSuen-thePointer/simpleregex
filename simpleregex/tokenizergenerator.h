@@ -70,11 +70,11 @@ protected:
         file << "    static int _dropState;\n";
         file << "    int _lastState;\n";
         file << "    int _line, _column;\n";
-        file << "    std::ifstream _file;\n";
+        file << "    " << reader.stream_type() << " _stream;\n";
         file << "    Token _prefetch;\n";
         file << "public:\n";
-        file << "    " << get_class_name() << "(const std::string& file)\n";
-        file << "        : _file(file)\n";
+        file << "    " << get_class_name() << "(const std::string& str)\n";
+        file << "        : _stream(str)\n";
         file << "        , _line(1)\n";
         file << "    {\n";
         file << "        prefetch();\n";
@@ -184,13 +184,13 @@ struct StateInfo
         file << R"__(
 {
     std::string matched;
-    while (!_file.eof())
+    while (!_stream.eof())
     {
-        char ch = _file.peek();
+        char ch = _stream.peek();
 
         if (_stateMachine[_lastState][ch] != _invalidState)
         {
-            _file.get();
+            _stream.get();
             _lastState = _stateMachine[_lastState][ch];
             matched.push_back(ch);
             if (ch == '\n')

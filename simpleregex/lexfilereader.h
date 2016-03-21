@@ -75,15 +75,13 @@ public:
     }
     void read_rules(LexReaderTokenizer& tokenizer)
     {
-        int label = 1;
         while (tokenizer.peek().kind != tokenizer.End)
         {
             auto regex = tokenizer.get();
             expect(tokenizer.get(), tokenizer.Colon, ":");
             auto ruleName = tokenizer.get();
 
-            _rules.push_back(Rule{label, ruleName.content, regex.content});
-            label++;
+            _rules.push_back(Rule{static_cast<int>(_rules.size() + 1), ruleName.content, regex.content});
         }
     }
 };

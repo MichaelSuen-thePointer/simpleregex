@@ -53,9 +53,9 @@ public:
         int line, column;
     };
 protected:
-    static int _stateMachine[113][256];
+    static int _stateMachine[112][256];
     static int _invalidState;
-    static int _endStates[112];
+    static int _endStates[111];
     static int _dropState;
     int _lastState;
     int _line, _column;

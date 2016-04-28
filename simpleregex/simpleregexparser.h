@@ -18,9 +18,17 @@
 
 #else
 
-#define O(x) /##/
-#define N /##/
-#define OO(x) /##/
+class invalid_stream_hack
+{
+public:
+    template<class T>
+    invalid_stream_hack& operator<<(T) { return *this; }
+};
+
+#define O(x) invalid_stream_hack() << x
+#define N (0)
+#define OO(x) ((void)0)
+
 
 #endif
 
@@ -78,8 +86,9 @@ class RegexTokenizer
 protected:
     std::istringstream _stream;
     int _prefetch;
-    int generate_token(int ch)
+    int generate_token()
     {
+        int ch = _stream.get();
         if (ch == '\\')
         {
             ch = _stream.get();
@@ -98,6 +107,10 @@ protected:
             if (ch == ' ')
             {
                 return ' ';
+            }
+            if (ch == '.')
+            {
+                return ALLCHAR;
             }
             else
             {
@@ -131,7 +144,7 @@ protected:
     {
         if (_stream.peek() != -1)
         {
-            _prefetch = generate_token(_stream.get());
+            _prefetch = generate_token();
         }
         else
         {
@@ -147,6 +160,7 @@ public:
         OR = 257,
         LBRACE = 258,
         RBRACE = 259,
+        ALLCHAR = 260
     };
     RegexTokenizer()
         : _stream()
@@ -190,6 +204,10 @@ public:
         {
             return isprint(ch) != 0 || ch == '\n' || ch == '\t';
         }
+        if (ch == ALLCHAR)
+        {
+            return true;
+        }
         return false;
     }
 };
@@ -231,12 +249,30 @@ private:
 
     using Token = RegexTokenizer;
 
+    unique_ptr<IRegex> parse_escaping_all()
+    {
+        OO("escaping all");
+        unique_ptr<IRegex> rhs;
+        rhs = std::make_unique<Char>(9);
+        for (int i = 11; i < 256; i++)
+        {
+            auto lhs = std::make_unique<Char>(i);
+            auto expr = std::make_unique<Or>(lhs.release(), rhs.release());
+            rhs.reset(expr.release());
+        }
+        return rhs;
+    }
+
     unique_ptr<IRegex> parse_char()
     {
         OO("return char");
         unique_ptr<IRegex> result;
         int token = _token_stream.get();
-        if (Token::is_char(token))
+        if (token == Token::ALLCHAR)
+        {
+            result = parse_escaping_all();
+        }
+        else if (Token::is_char(token))
         {
             O("char: ") << (char)token << N;
             result = std::make_unique<Char>(token);

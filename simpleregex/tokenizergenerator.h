@@ -120,11 +120,11 @@ public:
         , content(_content)
     {
     }
-    BadToken(char _content, int _line, int _column)
+    BadToken(unsigned char _content, int _line, int _column)
         : std::runtime_error("bad token")
         , line(_line)
         , column(_column)
-        , content{_content}
+        , content{(char)_content}
     {
     }
 };)__";
@@ -186,7 +186,7 @@ struct StateInfo
     std::string matched;
     while (!_file.eof())
     {
-        char ch = _file.peek();
+        unsigned char ch = _file.peek();
 
         if (_stateMachine[_lastState][ch] != _invalidState)
         {
@@ -213,7 +213,7 @@ struct StateInfo
             {
                 throw BadToken(matched, _line, static_cast<int>(_column + 1 - matched.length()));
             }
-            if (_endStates[_lastState] == _dropState)
+            if (_endStates[_lastState] == DROP)
             {
                 _lastState = 0;
                 matched.clear();

@@ -21,7 +21,7 @@ pair<vector<unique_ptr<Node>>, Node*> DFA::generate(const NFA & nfa)
     while (nodeQueue.size())
     {
         auto& nodeSet = nodeQueue.front();
-        map<char, set<const Node*>> newEdges;
+        map<unsigned char, set<const Node*>> newEdges;
         for (auto& node : nodeSet)
         {
             for (auto& edge : node->edges)

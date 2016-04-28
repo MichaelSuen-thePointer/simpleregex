@@ -34,7 +34,7 @@ struct StateInfo
 struct Node;
 struct Edge
 {
-    char accept;
+    unsigned char accept;
     Node* next;
 };
 

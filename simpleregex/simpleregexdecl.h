@@ -55,15 +55,15 @@ public:
 class Char: public IRegex
 {
 protected:
-    char _ch;
+    unsigned char _ch;
 public:
-    Char(char ch)
+    Char(unsigned char ch)
         : _ch(ch)
     {
     }
     virtual ~Char() {}
     
-    char ch() { return _ch; }
+    unsigned char ch() { return _ch; }
 
     virtual bool match(iterator&) override;
     virtual void accept(IVisitor&) override;

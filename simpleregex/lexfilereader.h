@@ -37,7 +37,7 @@ protected:
     string _classNameUpperCase;
     vector<Rule> _rules;
 
-    void expect(LexReaderTokenizer::Token& token, const LexReaderTokenizer::TokenKind kind, const string& description)
+    void expect(const LexReaderTokenizer::Token& token, const LexReaderTokenizer::TokenKind kind, const string& description)
     {
         if (token.kind != kind)
         {

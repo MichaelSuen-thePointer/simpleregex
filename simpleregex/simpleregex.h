@@ -10,6 +10,11 @@ namespace pl
 namespace regex
 {
 
+using std::enable_if;
+using std::is_same;
+using std::decay;
+using std::forward;
+
 class Regex
 {
 protected:
@@ -110,11 +115,6 @@ public:
         return update<Kleene>();
     }
 };
-
-using std::enable_if;
-using std::is_same;
-using std::decay;
-using std::forward;
 
 template<class Tl, class Tr,
 class = typename enable_if<is_same<typename decay<Tl>::type, Regex>::value>::type,

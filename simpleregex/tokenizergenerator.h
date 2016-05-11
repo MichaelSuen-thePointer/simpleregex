@@ -108,7 +108,7 @@ protected:
     }
     void output_exception_structure(std::ofstream& file)
     {
-        file << R"__(class BadToken: std::runtime_error
+        file << R"__(class BadToken: public std::runtime_error
 {
 public:
     int line, column;

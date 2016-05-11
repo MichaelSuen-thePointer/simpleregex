@@ -45,7 +45,7 @@ void Concat::accept(IVisitor& visitor)
     visitor.visit(*this);
 }
 
-bool Or::match(iterator& iter)
+bool Alternative::match(iterator& iter)
 {
     if (_left->match(iter) || _right->match(iter))
     {
@@ -54,7 +54,7 @@ bool Or::match(iterator& iter)
     return false;
 }
 
-void Or::accept(IVisitor& visitor)
+void Alternative::accept(IVisitor& visitor)
 {
     visitor.visit(*this);
 }
@@ -71,6 +71,16 @@ bool Kleene::match(iterator& iter)
 }
 
 void Kleene::accept(IVisitor& visitor)
+{
+    visitor.visit(*this);
+}
+
+bool CharRange::match(iterator& iter)
+{
+    return in_range(*iter);
+}
+
+void CharRange::accept(IVisitor& visitor)
 {
     visitor.visit(*this);
 }

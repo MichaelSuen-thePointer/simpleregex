@@ -4,6 +4,7 @@
 
 #include <string>
 #include <memory>
+#include <cassert>
 
 namespace pl
 {
@@ -18,7 +19,7 @@ using std::string;
 class Empty;
 class Char;
 class Concat;
-class Or;
+class Alternative;
 class Kleene;
 
 class IRegex
@@ -37,8 +38,9 @@ public:
         virtual ~IVisitor() {}
         virtual void visit(Empty&) = 0;
         virtual void visit(Char&) = 0;
+        virtual void visit(CharRange&) = 0;
         virtual void visit(Concat&) = 0;
-        virtual void visit(Or&) = 0;
+        virtual void visit(Alternative&) = 0;
         virtual void visit(Kleene&) = 0;
     };
 
@@ -55,15 +57,35 @@ public:
 class Char: public IRegex
 {
 protected:
-    unsigned char _ch;
+    char _ch;
 public:
-    Char(unsigned char ch)
+    Char(char ch)
         : _ch(ch)
     {
     }
-    virtual ~Char() {}
-    
+
     unsigned char ch() { return _ch; }
+
+    virtual bool match(iterator&) override;
+    virtual void accept(IVisitor&) override;
+};
+
+class CharRange : public IRegex
+{
+protected:
+    char _front;
+    char _back;
+public:
+    CharRange(char front, char back)
+        : _front(front)
+        , _back(back)
+    {
+        assert(front <= back);
+    }
+    char front() { return _front; }
+    char back() { return _back; }
+    
+    bool in_range(char ch) { return ch >= _front && ch <= _back; }
 
     virtual bool match(iterator&) override;
     virtual void accept(IVisitor&) override;
@@ -95,23 +117,23 @@ public:
     virtual void accept(IVisitor&) override;
 };
 
-class Or: public IRegex
+class Alternative: public IRegex
 {
 protected:
     unique_ptr<IRegex> _left;
     unique_ptr<IRegex> _right;
 public:
-    Or(IRegex* left, IRegex* right)
+    Alternative(IRegex* left, IRegex* right)
         : _left(left)
         , _right(right)
     {
     }
-    Or(unique_ptr<IRegex>&& left, unique_ptr<IRegex> right)
+    Alternative(unique_ptr<IRegex>&& left, unique_ptr<IRegex> right)
         : _left(std::move(left))
         , _right(std::move(right))
     {
     }
-    virtual ~Or()
+    virtual ~Alternative()
     {
     }
 

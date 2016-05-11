@@ -39,7 +39,7 @@ class Tokenizer
 public:
     enum TokenKind
     {
-        End = 0,
+        EndToken = 0,
         DROP = 1,
         LoadWord = 2,
         LoadByte = 3,
@@ -56,7 +56,7 @@ public:
         SetLess = 14,
         SetULess = 15,
         And = 16,
-        Or = 17,
+        Alternative = 17,
         Xor = 18,
         Nor = 19,
         LogicLShift = 20,

@@ -8,27 +8,23 @@
 #include <sstream>
 #include <functional>
 
-#if defined _DEBUG
+#if defined _DEBUG && defined PARSER_LOG
 
-#include <iostream>
-#include <iomanip>
-#define O(msg) std::cout << std::setw(depth) << ">" << msg
-#define N std::endl
-#define OO(msg) scope_guard __x([](){depth++;}, [](){ O(msg) << N;depth--;})
+#include <fstream>
 
+static std::ofstream logger("parser_log.txt");
+#define LOGGER logger
 #else
 
-class invalid_stream_hack
+class NotingToLog
 {
 public:
     template<class T>
-    invalid_stream_hack& operator<<(T) { return *this; }
+    NotingToLog& operator<<(T) { return *this; }
 };
 
-#define O(x) invalid_stream_hack() << x
-#define N (0)
-#define OO(x) ((void)0)
-
+static NotingToLog logger;
+#define LOGGER logger
 
 #endif
 
@@ -36,108 +32,132 @@ namespace pl
 {
 namespace regex
 {
-extern int depth;
-struct scope_guard
-{
-    std::function<void()> _ctor, _dtor;
-    scope_guard(std::function<void()> ctor, std::function<void()> dtor)
-        : _ctor(ctor)
-        , _dtor(dtor)
-    {
-        _ctor();
-    }
-    ~scope_guard()
-    {
-        _dtor();
-    }
-};
-
-
 
 using std::shared_ptr;
 using std::string;
 
-class ParseError: std::runtime_error
+class RegexParseError : std::runtime_error
 {
 public:
-    char error_char;
-    char expect;
-    ParseError(const char* message, const char error, const char _expect)
+    RegexTokenizer::RegexToken error_token;
+    RegexTokenizer::RegexTokenType expect_type;
+    RegexParseError(const char* message, const RegexTokenizer::RegexToken& error, const RegexTokenizer::RegexTokenType expect)
         : std::runtime_error(message)
-        , error_char(error)
-        , expect(_expect)
+        , error_token(error)
+        , expect_type(expect)
     {
     }
 };
 
-class BadToken: std::runtime_error
+class BadRegexToken : std::runtime_error
 {
 public:
     char bad_token;
-    BadToken(const char* message, const char token)
+    size_t position;
+    BadRegexToken(const char* message, size_t pos, const char token)
         : std::runtime_error(message)
         , bad_token(token)
+        , position(pos)
     {
     }
 };
 
 class RegexTokenizer
 {
+public:
+    enum class RegexTokenType : int
+    {
+        EndToken = 0,
+        Star = 256,
+        Alternative = 257,
+        LCircleBracket = 258,
+        RCircleBracket = 259,
+        AllChar,
+        //
+        Char,
+        LSquareBracket,
+        RSquareBracket,
+        Slash,
+    };
+
+    struct RegexToken
+    {
+        RegexTokenType type;
+        char token;
+    };
 protected:
+
+    enum class ParseState
+    {
+        None,
+        InCharRange,
+    };
+
     std::istringstream _stream;
-    int _prefetch;
-    int generate_token()
+    RegexToken _prefetch;
+
+    RegexToken generate_token()
     {
         int ch = _stream.get();
         if (ch == '\\')
         {
             ch = _stream.get();
-            if (ch == '*' || ch == '|' || ch == '(' || ch == ')' || ch == '\\' || ch == ':')
-            {
-                return ch;
-            }
             if (ch == 't')
             {
-                return '\t';
+                return{ RegexTokenType::Char, '\t' };
             }
             if (ch == 'n')
             {
-                return '\n';
-            }
-            if (ch == ' ')
-            {
-                return ' ';
+                return{ RegexTokenType::Char, '\n' };
             }
             if (ch == '.')
             {
-                return ALLCHAR;
+                return{ RegexTokenType::AllChar, ch };
+            }
+            if (ch == -1)
+            {
+                throw BadRegexToken("meet end of input", _stream.tellg(), ch);
             }
             else
             {
-                throw BadToken("bad escaping character", ch);
+                return{ RegexTokenType::Char, ch };
             }
         }
-        if (ch == '*')
+        switch (ch)
         {
-            return STAR;
-        }
-        if (ch == '|')
+        case '*':
         {
-            return OR;
+            return{ RegexTokenType::Star, ch };
         }
-        if (ch == '(')
+        case '|':
         {
-            return LBRACE;
+            return{ RegexTokenType::Alternative, ch };
         }
-        if (ch == ')')
+        case '(':
         {
-            return RBRACE;
+            return{ RegexTokenType::LCircleBracket, ch };
         }
-        if (isprint(ch))
+        case ':':
         {
-            return ch;
+            return{ RegexTokenType::RCircleBracket, ch };
         }
-        throw BadToken("bad token", ch);
+        case '[':
+        {
+            return{ RegexTokenType::LSquareBracket, ch };
+        }
+        case ']':
+        {
+            return{ RegexTokenType::RSquareBracket, ch };
+        }
+        case '-':
+        {
+            return{ RegexTokenType::Slash, ch };
+        }
+        default:
+        {
+            throw BadRegexToken("bad token", _stream.tellg(), ch);
+        }
+        }
     }
 
     void generate_prefetch()
@@ -148,35 +168,26 @@ protected:
         }
         else
         {
-            _prefetch = END;
+            _prefetch = { RegexTokenType::EndToken, 0 };
         }
     }
 
 public:
-    enum TokenType: int
-    {
-        END = 0,
-        STAR = 256,
-        OR = 257,
-        LBRACE = 258,
-        RBRACE = 259,
-        ALLCHAR = 260
-    };
     RegexTokenizer()
         : _stream()
-        , _prefetch()
+        , _prefetch{ RegexTokenType::EndToken, 0 }
     {
     }
 
-    RegexTokenizer(string reg_expr)
-        : _stream(reg_expr)
-        , _prefetch()
+    RegexTokenizer(string regex)
+        : _stream(regex)
+        , _prefetch{ RegexTokenType::EndToken, 0 }
     {
         generate_prefetch();
     }
-    void reset(string regexp)
+    void reset(string regex)
     {
-        _stream.str(regexp);
+        _stream.str(regex);
         _stream.seekg(0, _stream.beg);
         _stream.clear();
         generate_prefetch();
@@ -187,108 +198,125 @@ public:
         _stream.clear();
         generate_prefetch();
     }
-    int get()
+    RegexToken get()
     {
-        int result = _prefetch;
+        auto result = _prefetch;
         generate_prefetch();
-
         return result;
     }
-    int peek()
+    RegexToken peek()
     {
         return _prefetch;
-    }
-    static bool is_char(int ch)
-    {
-        if (ch >= 0 && ch <= 255)
-        {
-            return isprint(ch) != 0 || ch == '\n' || ch == '\t';
-        }
-        if (ch == ALLCHAR)
-        {
-            return true;
-        }
-        return false;
     }
 };
 
 class RegexParser
 {
 private:
+    using TokenType = RegexTokenizer::RegexTokenType;
+    using Token = RegexTokenizer::RegexToken;
+
     RegexTokenizer _token_stream;
 
-    static void expect(int ch, int expect)
+    Token stream_peek()
     {
-        if (ch != expect)
+        return _token_stream.peek();
+    }
+
+    Token stream_get()
+    {
+        return _token_stream.get();
+    }
+
+    static void expect_type(Token ch, TokenType expect)
+    {
+        if (ch.type != expect)
         {
-            throw ParseError("token not expected", ch, expect);
+            throw RegexParseError("token not expected", ch, expect);
         }
     }
+    /*
     static void not_expect(int ch, int nexpect)
     {
         if (ch == nexpect)
         {
-            throw ParseError("token not expected", ch, nexpect);
+            throw RegexParseError("token not expected", ch, nexpect);
         }
     }
     static void expect_any(int ch, std::initializer_list<int> list)
     {
         if (std::find(list.begin(), list.end(), ch) == list.end())
         {
-            throw ParseError("didn't meet any of", ch, '\0');
+            throw RegexParseError("didn't meet any of", ch, '\0');
         }
     }
     static void not_expect_any(int ch, std::initializer_list<int> list)
     {
         if (std::find(list.begin(), list.end(), ch) != list.end())
         {
-            throw ParseError("meet any of", ch, '\0');
+            throw RegexParseError("meet any of", ch, '\0');
         }
     }
+    */
 private:
-
-    using Token = RegexTokenizer;
-
     unique_ptr<IRegex> parse_escaping_all()
     {
-        OO("escaping all");
+        LOGGER << "escaping all\n";
         unique_ptr<IRegex> rhs;
         rhs = std::make_unique<Char>(9);
         for (int i = 11; i < 256; i++)
         {
             auto lhs = std::make_unique<Char>(i);
-            auto expr = std::make_unique<Or>(lhs.release(), rhs.release());
+            auto expr = std::make_unique<Alternative>(lhs.release(), rhs.release());
             rhs.reset(expr.release());
         }
         return rhs;
     }
 
+    unique_ptr<IRegex> parse_char_range()
+    {
+        // TODO :
+    }
+
     unique_ptr<IRegex> parse_char()
     {
-        OO("return char");
+        LOGGER << "return char\n";
         unique_ptr<IRegex> result;
-        int token = _token_stream.get();
-        if (token == Token::ALLCHAR)
+        Token token = _token_stream.get();
+
+        switch (token.type)
+        {
+        case TokenType::AllChar:
         {
             result = parse_escaping_all();
+            break;
         }
-        else if (Token::is_char(token))
+        case TokenType::Char:
         {
-            O("char: ") << (char)token << N;
             result = std::make_unique<Char>(token);
+            break;
         }
-        else if (token == Token::LBRACE)
+        case TokenType::LSquareBracket:
         {
-            O("lbrace") << N;
+            result = parse_char_range();
+            expect_type(stream_get(), TokenType::RCircleBracket);
+            break;
+        }
+        case TokenType::LCircleBracket:
+        {
             result = parse_expr();
-            expect(_token_stream.get(), Token::RBRACE);
-            O("rbrace") << N;
+            expect_type(stream_get(), TokenType::RCircleBracket);
+            break;
         }
-        token = _token_stream.peek();
-        if (token == Token::STAR)
+        default:
         {
-            O("star") << N;
-            _token_stream.get();
+            throw RegexParseError("expect char, char range or expression here", token, TokenType::Char);
+        }
+        }
+        token = stream_peek();
+        if (token.type == TokenType::Star)
+        {
+            stream_get();
             result = std::make_unique<Kleene>(result.release());
         }
         return result;
@@ -296,13 +324,9 @@ private:
 
     unique_ptr<IRegex> parse_concat_term()
     {
-        OO("return concat");
-        O("parse concat") << N;
-        unique_ptr<IRegex> result;
-        int token;
-        result = parse_char();
-        token = _token_stream.peek();
-        if (Token::is_char(token) || token == Token::LBRACE)
+        unique_ptr<IRegex> result = parse_char();
+        Token token = stream_peek();
+        if (token.type == TokenType::Char || token.type == TokenType::LCircleBracket)
         {
             auto another = parse_concat_term();
             result = std::make_unique<Concat>(result.release(), another.release());
@@ -312,30 +336,24 @@ private:
 
     unique_ptr<IRegex> parse_or_term()
     {
-        OO("return or");
-        O("parse or") << N;
-        unique_ptr<IRegex> result;
-        result = parse_concat_term();
-        int token = _token_stream.peek();
-        if (token == Token::OR)
+        unique_ptr<IRegex> result = parse_concat_term();
+        Token token = stream_peek();
+        if (token.type == TokenType::Alternative)
         {
-            O("or") << N;
-            _token_stream.get();
+            stream_get();
             auto another = parse_or_term();
-            result = std::make_unique<Or>(result.release(), another.release());
+            result = std::make_unique<Alternative>(result.release(), another.release());
         }
-        else if (token != Token::END && token != Token::RBRACE)
+        else if (token.type != TokenType::EndToken && token.type != TokenType::RCircleBracket)
         {
-            throw ParseError("unexpected token", token, '\0');
+            throw RegexParseError("unexpected token", token, TokenType::Alternative);
         }
         return result;
     }
 
     unique_ptr<IRegex> parse_expr()
     {
-        OO("return expr");
-        O("parse expr") << N;
-        if (_token_stream.peek() != Token::END)
+        if (stream_peek().type != TokenType::EndToken)
         {
             return parse_or_term();
         }

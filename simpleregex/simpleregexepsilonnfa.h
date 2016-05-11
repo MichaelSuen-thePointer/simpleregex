@@ -29,7 +29,7 @@ private:
         virtual void visit(Empty&) override;
         virtual void visit(Char&) override;
         virtual void visit(Concat&) override;
-        virtual void visit(Or&) override;
+        virtual void visit(Alternative&) override;
         virtual void visit(Kleene&) override;
 
         void adopt_pool(vector<unique_ptr<Node>>& rhs);

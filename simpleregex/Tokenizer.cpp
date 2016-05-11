@@ -190,7 +190,7 @@ void Tokenizer::prefetch()
     {
         throw BadToken(matched, _line, _column);
     }
-    _prefetch = Token{TokenKind::End, matched, _line, _column};
+    _prefetch = Token{TokenKind::EndToken, matched, _line, _column};
 }
 
 Tokenizer::Token Tokenizer::peek()

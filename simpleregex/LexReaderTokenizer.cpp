@@ -165,7 +165,7 @@ void LexReaderTokenizer::prefetch()
     {
         throw BadToken(matched, _line, _column);
     }
-    _prefetch = Token{TokenKind::End, matched, _line, _column};
+    _prefetch = Token{TokenKind::EndToken, matched, _line, _column};
 }
 
 LexReaderTokenizer::Token LexReaderTokenizer::peek()

@@ -24,13 +24,13 @@ void Regex::Cloner::visit(Concat& expr)
     _result = std::make_unique<Concat>(left.move_result(), right.move_result());
 }
 
-void Regex::Cloner::visit(Or& expr)
+void Regex::Cloner::visit(Alternative& expr)
 {
     Cloner left, right;
     expr.left()->accept(left);
     expr.right()->accept(right);
 
-    _result = std::make_unique<Or>(left.move_result(), right.move_result());
+    _result = std::make_unique<Alternative>(left.move_result(), right.move_result());
 }
 
 void Regex::Cloner::visit(Kleene& expr)

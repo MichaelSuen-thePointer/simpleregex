@@ -36,7 +36,7 @@ void EpsilonNFA::NFAGenerator::visit(Concat& node)
     end->stateInfo = _info;
 }
 
-void EpsilonNFA::NFAGenerator::visit(Or& node)
+void EpsilonNFA::NFAGenerator::visit(Alternative& node)
 {
     NFAGenerator left, right;
     node.left()->accept(left);

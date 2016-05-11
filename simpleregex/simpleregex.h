@@ -38,7 +38,7 @@ protected:
         virtual void visit(Empty&) override;
         virtual void visit(Char&) override;
         virtual void visit(Concat&) override;
-        virtual void visit(Or&) override;
+        virtual void visit(Alternative&) override;
         virtual void visit(Kleene&) override;
     };
 
@@ -107,7 +107,7 @@ public:
     template<class T, class = typename enable_if<is_same<typename decay<T>::type, Regex>::value>::type>
     Regex& operator|=(T&& rhs)
     {
-        return update<Or>(copy_or_move(std::forward<T>(rhs)));
+        return update<Alternative>(copy_or_move(std::forward<T>(rhs)));
     }
 
     Regex& operator*=(int)
@@ -131,7 +131,7 @@ class = typename enable_if<is_same<typename decay<Tr>::type, Regex>::value>::typ
 >
 Regex operator|(Tl&& lhs, Tr&& rhs)
 {
-    return Regex::create<Or>(Regex::copy_or_move(forward<Tl>(lhs)), Regex::copy_or_move(forward<Tr>(rhs)));
+    return Regex::create<Alternative>(Regex::copy_or_move(forward<Tl>(lhs)), Regex::copy_or_move(forward<Tr>(rhs)));
 }
 
 template<class Tl,

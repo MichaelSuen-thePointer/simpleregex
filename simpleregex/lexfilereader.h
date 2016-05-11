@@ -52,7 +52,7 @@ public:
     void read_file(const string& filePath)
     {
         LexReaderTokenizer tokenizer(filePath);
-        while (tokenizer.peek().kind != tokenizer.End)
+        while (tokenizer.peek().kind != tokenizer.EndToken)
         {
             auto token = tokenizer.get();
             if (token.kind == tokenizer.ClassName)
@@ -75,7 +75,7 @@ public:
     }
     void read_rules(LexReaderTokenizer& tokenizer)
     {
-        while (tokenizer.peek().kind != tokenizer.End)
+        while (tokenizer.peek().kind != tokenizer.EndToken)
         {
             auto regex = tokenizer.get();
             expect(tokenizer.get(), tokenizer.Colon, ":");

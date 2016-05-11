@@ -7,7 +7,7 @@ int main()
 
     try
     {
-        while (lex.peek().kind != lex.End)
+        while (lex.peek().kind != lex.EndToken)
         {
 
             auto token = lex.get();

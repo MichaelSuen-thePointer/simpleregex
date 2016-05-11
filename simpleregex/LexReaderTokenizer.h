@@ -39,7 +39,7 @@ class LexReaderTokenizer
 public:
     enum TokenKind
     {
-        End = 0,
+        EndToken = 0,
         DROP = 1,
         ClassName = 2,
         Rules = 3,

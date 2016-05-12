@@ -14,7 +14,7 @@ void EpsilonNFA::NFAGenerator::visit(Char& node)
 {
     _pool.push_back(std::make_unique<Node>());
     auto newNode = _pool.back().get();
-    start->edges.push_back(Edge{node.ch(), newNode});
+    start->edges.push_back(Edge{ node.ch(), newNode });
     end = newNode;
     end->stateInfo = _info;
 }
@@ -31,7 +31,7 @@ void EpsilonNFA::NFAGenerator::visit(Concat& node)
     adopt_pool(right._pool);
 
     start = left.start;
-    left.end->edges.push_back(Edge{'\0', right.start});
+    left.end->edges.push_back(Edge{ '\0', right.start });
     end = right.end;
     end->stateInfo = _info;
 }
@@ -45,8 +45,8 @@ void EpsilonNFA::NFAGenerator::visit(Alternative& node)
     adopt_pool(left._pool);
     adopt_pool(right._pool);
 
-    right.start->edges.push_back(Edge{'\0', left.start});
-    left.end->edges.push_back(Edge{'\0', right.end});
+    right.start->edges.push_back(Edge{ '\0', left.start });
+    left.end->edges.push_back(Edge{ '\0', right.end });
 
     start = right.start;
     end = right.end;
@@ -60,10 +60,21 @@ void EpsilonNFA::NFAGenerator::visit(Kleene& node)
 
     adopt_pool(expr._pool);
 
-    expr.end->edges.push_back(Edge{'\0', expr.start});
-    expr.start->edges.push_back(Edge{'\0', expr.end});
+    expr.end->edges.push_back(Edge{ '\0', expr.start });
+    expr.start->edges.push_back(Edge{ '\0', expr.end });
     start = expr.start;
     end = expr.end;
+    end->stateInfo = _info;
+}
+
+void EpsilonNFA::NFAGenerator::visit(CharRange& node)
+{
+    _pool.push_back(std::make_unique<Node>());
+    end = _pool.back().get();
+    for (char ch = node.front(); ch <= node.back(); ch++)
+    {
+        start->edges.push_back({ ch, end });
+    }
     end->stateInfo = _info;
 }
 
@@ -105,7 +116,7 @@ EpsilonNFA& EpsilonNFA::combine_regex(IRegex* regex, const StateInfo& matchName)
     }
     else
     {
-        _startState->edges.push_back(Edge{'\0', generator.start});
+        _startState->edges.push_back(Edge{ '\0', generator.start });
     }
     _endStates.push_back(generator.end);
     return *this;

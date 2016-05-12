@@ -273,9 +273,39 @@ private:
         return rhs;
     }
 
-    unique_ptr<IRegex> parse_char_range()
+    unique_ptr<IRegex> parse_char_range_or_term()
     {
-        // TODO :
+        Token token = stream_get();
+        expect_type(token, TokenType::Char);
+        char front = token.token;
+        char back = front;
+        if (stream_peek().type == TokenType::Slash)
+        {
+            stream_get();
+            token = stream_get();
+            expect_type(token, TokenType::Char);
+            back = token.token;
+            if (front > back)
+            {
+                throw RegexParseError("char range must be increasing", token, TokenType::Char);
+            }
+        }
+        return std::make_unique<CharRange>(front, back);
+    }
+
+    unique_ptr<IRegex> parse_char_range() // parse [a|b|c-d] [a-zA-Z]
+    {
+        auto result = parse_char_range_or_term();
+        while (stream_peek().type != TokenType::RSquareBracket)
+        {
+            if (stream_peek().type == TokenType::Alternative)
+            {
+                stream_get(); //allow [a|b|c]
+            }
+            auto nextTerm = parse_char_range_or_term();
+            result = std::make_unique<Alternative>(result.release(), nextTerm.release());
+        }
+        return result;
     }
 
     unique_ptr<IRegex> parse_char()

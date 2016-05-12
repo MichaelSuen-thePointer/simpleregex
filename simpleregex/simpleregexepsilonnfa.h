@@ -31,6 +31,7 @@ private:
         virtual void visit(Concat&) override;
         virtual void visit(Alternative&) override;
         virtual void visit(Kleene&) override;
+        virtual void visit(CharRange &) override;
 
         void adopt_pool(vector<unique_ptr<Node>>& rhs);
     public:

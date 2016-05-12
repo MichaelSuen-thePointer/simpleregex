@@ -76,6 +76,7 @@ public:
     {
         return _matchStates.size() > 0;
     }
+
     void debug_print(std::ostream& os) const
     {
         map<Node*, bool> visited;

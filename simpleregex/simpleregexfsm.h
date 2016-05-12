@@ -25,14 +25,14 @@ using std::tuple;
 class FSM
 {
 protected:
-    vector<array<int, 256>> _stateMachine;
+    vector<array<size_t, 256>> _stateMachine;
     vector<StateInfo> _endStates;
-    int _dropState;
-    int _invalidState;
+    ptrdiff_t _dropState;
+    size_t _invalidState;
 
-    static tuple<vector<array<int, 256>>,
+    static tuple<vector<array<size_t, 256>>,
         vector<StateInfo>,
-        int>
+        size_t>
         generate(const DFA& dfa);
 public:
     FSM()
@@ -109,11 +109,11 @@ public:
     }
 #endif //_DEBUG
 
-    int state_count() { return _stateMachine.size(); }
-    const vector<array<int, 256>>& state_machine() { return _stateMachine; }
-    int invalid_state() { return _invalidState; }
+    size_t state_count() { return _stateMachine.size(); }
+    const vector<array<size_t, 256>>& state_machine() { return _stateMachine; }
+    size_t invalid_state() { return _invalidState; }
     const vector<StateInfo>& end_states() { return _endStates; }
-    int drop_state() { return _dropState; }
+    ptrdiff_t drop_state() { return _dropState; }
     void set_drop_state(const string& stateName)
     {
         for (auto iter = _endStates.begin(); iter != _endStates.end(); ++iter)
@@ -129,7 +129,7 @@ public:
 
     StateInfo match(const string& text)
     {
-        int lastState = 0;
+        size_t lastState = 0;
 
         string::const_iterator toMatch = text.cbegin();
 

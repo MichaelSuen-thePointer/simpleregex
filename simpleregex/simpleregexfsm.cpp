@@ -4,18 +4,18 @@ namespace pl
 namespace regex
 {
 
-tuple<vector<array<int, 256>>,
+tuple<vector<array<size_t, 256>>,
     vector<StateInfo>,
-    int>
+    size_t>
     FSM::generate(const DFA & dfa)
 {
-    vector<array<int, 256>> _stateMachine(dfa.node_pool().size() + 1, array<int, 256>());
+    vector<array<size_t, 256>> _stateMachine(dfa.node_pool().size() + 1);
     vector<StateInfo> _endStates;
-    map<const Node*, int> nodeSet2State;
-    int maxEndStateLabel = -1;
+    map<const Node*, size_t> nodeSet2State;
+    size_t maxEndStateLabel = -1;
     nodeSet2State[dfa.start()] = 0;
 
-    int _invalidState = dfa.node_pool().size();
+    size_t _invalidState = dfa.node_pool().size();
     _stateMachine.reserve(_invalidState + 1);
     for (auto& node : dfa.node_pool())
     {
@@ -26,7 +26,7 @@ tuple<vector<array<int, 256>>,
     }
     for (auto& node : dfa.node_pool())
     {
-        int stateLabel = nodeSet2State[node.get()];
+        size_t stateLabel = nodeSet2State[node.get()];
         std::fill(_stateMachine[stateLabel].begin(), _stateMachine[stateLabel].end(), _invalidState);
         for (auto& edge : node->edges)
         {
@@ -34,7 +34,7 @@ tuple<vector<array<int, 256>>,
         }
         if (node->stateInfo.label != Node::MIDDLE_STATE)
         {
-            if (maxEndStateLabel < nodeSet2State[node.get()])
+            if (maxEndStateLabel < nodeSet2State[node.get()] || maxEndStateLabel == -1)
             {
                 maxEndStateLabel = nodeSet2State[node.get()];
             }

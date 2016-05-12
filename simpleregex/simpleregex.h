@@ -37,6 +37,7 @@ protected:
 
         virtual void visit(Empty&) override;
         virtual void visit(Char&) override;
+        virtual void visit(CharRange&) override;
         virtual void visit(Concat&) override;
         virtual void visit(Alternative&) override;
         virtual void visit(Kleene&) override;

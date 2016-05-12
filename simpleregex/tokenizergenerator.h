@@ -154,7 +154,7 @@ struct StateInfo
         for (auto& line : fsm.state_machine())
         {
             file << "{";
-            std::copy(line.begin(), line.end(), std::ostream_iterator<int>(file, ","));
+            std::copy(line.begin(), line.end(), std::ostream_iterator<size_t>(file, ","));
             file.seekp(-1, file.cur);
             file << "},\n";
         }

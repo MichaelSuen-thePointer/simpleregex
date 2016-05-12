@@ -15,6 +15,11 @@ void Regex::Cloner::visit(Char& expr)
     _result = std::make_unique<Char>(expr.ch());
 }
 
+void Regex::Cloner::visit(CharRange& expr)
+{
+    _result = std::make_unique<CharRange>(expr.front(), expr.back());
+}
+
 void Regex::Cloner::visit(Concat& expr)
 {
     Cloner left, right;

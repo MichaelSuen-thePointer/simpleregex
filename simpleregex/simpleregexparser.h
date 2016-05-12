@@ -36,19 +36,6 @@ namespace regex
 using std::shared_ptr;
 using std::string;
 
-class RegexParseError : std::runtime_error
-{
-public:
-    RegexTokenizer::RegexToken error_token;
-    RegexTokenizer::RegexTokenType expect_type;
-    RegexParseError(const char* message, const RegexTokenizer::RegexToken& error, const RegexTokenizer::RegexTokenType expect)
-        : std::runtime_error(message)
-        , error_token(error)
-        , expect_type(expect)
-    {
-    }
-};
-
 class BadRegexToken : std::runtime_error
 {
 public:
@@ -112,50 +99,54 @@ protected:
             }
             if (ch == '.')
             {
-                return{ RegexTokenType::AllChar, ch };
+                return{ RegexTokenType::AllChar, (char)ch };
             }
             if (ch == -1)
             {
-                throw BadRegexToken("meet end of input", _stream.tellg(), ch);
+                throw BadRegexToken("meet end of input", _stream.tellg(), '\0');
             }
             else
             {
-                return{ RegexTokenType::Char, ch };
+                return{ RegexTokenType::Char, (char)ch };
             }
         }
         switch (ch)
         {
         case '*':
         {
-            return{ RegexTokenType::Star, ch };
+            return{ RegexTokenType::Star, (char)ch };
         }
         case '|':
         {
-            return{ RegexTokenType::Alternative, ch };
+            return{ RegexTokenType::Alternative, (char)ch };
         }
         case '(':
         {
-            return{ RegexTokenType::LCircleBracket, ch };
+            return{ RegexTokenType::LCircleBracket, (char)ch };
         }
         case ':':
         {
-            return{ RegexTokenType::RCircleBracket, ch };
+            return{ RegexTokenType::RCircleBracket, (char)ch };
         }
         case '[':
         {
-            return{ RegexTokenType::LSquareBracket, ch };
+            return{ RegexTokenType::LSquareBracket, (char)ch };
         }
         case ']':
         {
-            return{ RegexTokenType::RSquareBracket, ch };
+            return{ RegexTokenType::RSquareBracket, (char)ch };
         }
         case '-':
         {
-            return{ RegexTokenType::Slash, ch };
+            return{ RegexTokenType::Slash, (char)ch };
+        }
+        case -1:
+        {
+            throw BadRegexToken("meed end of input", _stream.tellg(), '\0');
         }
         default:
         {
-            throw BadRegexToken("bad token", _stream.tellg(), ch);
+            throw BadRegexToken("bad token", _stream.tellg(), (char)ch);
         }
         }
     }
@@ -207,6 +198,19 @@ public:
     RegexToken peek()
     {
         return _prefetch;
+    }
+};
+
+class RegexParseError : std::runtime_error
+{
+public:
+    RegexTokenizer::RegexToken error_token;
+    RegexTokenizer::RegexTokenType expect_type;
+    RegexParseError(const char* message, const RegexTokenizer::RegexToken& error, const RegexTokenizer::RegexTokenType expect)
+        : std::runtime_error(message)
+        , error_token(error)
+        , expect_type(expect)
+    {
     }
 };
 
@@ -323,7 +327,7 @@ private:
         }
         case TokenType::Char:
         {
-            result = std::make_unique<Char>(token);
+            result = std::make_unique<Char>(token.token);
             break;
         }
         case TokenType::LSquareBracket:

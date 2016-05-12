@@ -21,6 +21,7 @@ class Char;
 class Concat;
 class Alternative;
 class Kleene;
+class CharRange;
 
 class IRegex
 {
@@ -64,7 +65,7 @@ public:
     {
     }
 
-    unsigned char ch() { return _ch; }
+    char ch() { return _ch; }
 
     virtual bool match(iterator&) override;
     virtual void accept(IVisitor&) override;

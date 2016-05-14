@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
+#include <memory>
 #include <gtest/gtest.h>
+#include "syntaxTreeComparer.h"
 
 #include "..\simpleregex\simpleregexparser.h"
 
@@ -55,9 +57,32 @@ TEST(ParserTest, Tokenizer)
     }
 }
 
+void gtest_tree_eq(regex::IRegex* a, regex::IRegex* b)
+{
+    GTestTreeComparer comparer(a);
+    b->accept(comparer);
+}
+
+std::unique_ptr<regex::IRegex> alternative(std::unique_ptr<regex::IRegex> a, std::unique_ptr<regex::IRegex> b)
+{
+    return std::make_unique<regex::Alternative>(a.release(), b.release());
+}
+
+std::unique_ptr<regex::IRegex> ch(char ch)
+{
+    return std::make_unique<regex::Char>(ch);
+}
+
 TEST(ParserTest, Parser_Single)
 {
-    
+    std::string regex = "a|b|c";
+
+    regex::RegexParser parser(regex);
+
+    auto ansTree = parser.parse();
+    auto stdTree = alternative(ch('a'), alternative(ch('b'), ch('c')));
+
+    gtest_tree_eq(ansTree.get(), stdTree.get());
 }
 
 int main(int argc, char** argv)

@@ -156,7 +156,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\simpleregex\simpleregexdecl.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="syntaxTreeComparer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="syntaxTreeComparer.h" />

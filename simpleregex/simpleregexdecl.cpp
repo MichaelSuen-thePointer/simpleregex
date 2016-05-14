@@ -1,4 +1,5 @@
 #include "simpleregexdecl.h"
+
 namespace pl
 {
 namespace regex

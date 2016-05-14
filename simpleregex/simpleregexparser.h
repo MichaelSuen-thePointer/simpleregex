@@ -7,6 +7,7 @@
 #include <initializer_list>
 #include <sstream>
 #include <functional>
+#include <cctype>
 
 #if defined _DEBUG && defined PARSER_LOG
 
@@ -40,8 +41,8 @@ class BadRegexToken : std::runtime_error
 {
 public:
     char bad_token;
-    size_t position;
-    BadRegexToken(const char* message, size_t pos, const char token)
+    std::streamoff position;
+    BadRegexToken(const char* message, std::streamoff pos, const char token)
         : std::runtime_error(message)
         , bad_token(token)
         , position(pos)
@@ -124,7 +125,7 @@ protected:
         {
             return{ RegexTokenType::LCircleBracket, (char)ch };
         }
-        case ':':
+        case ')':
         {
             return{ RegexTokenType::RCircleBracket, (char)ch };
         }
@@ -142,10 +143,14 @@ protected:
         }
         case -1:
         {
-            throw BadRegexToken("meed end of input", _stream.tellg(), '\0');
+            throw BadRegexToken("meet end of input", _stream.tellg(), '\0');
         }
         default:
         {
+            if (std::isprint(ch))
+            {
+                return{ RegexTokenType::Char, (char)ch };
+            }
             throw BadRegexToken("bad token", _stream.tellg(), (char)ch);
         }
         }

@@ -299,6 +299,10 @@ private:
                 throw RegexParseError("char range must be increasing", token, TokenType::Char);
             }
         }
+        if (front == back)
+        {
+            return std::make_unique<Char>(front);
+        }
         return std::make_unique<CharRange>(front, back);
     }
 
@@ -311,7 +315,7 @@ private:
             {
                 stream_get(); //allow [a|b|c]
             }
-            auto nextTerm = parse_char_range_or_term();
+            auto nextTerm = parse_char_range();
             result = std::make_unique<Alternative>(result.release(), nextTerm.release());
         }
         return result;
@@ -338,7 +342,7 @@ private:
         case TokenType::LSquareBracket:
         {
             result = parse_char_range();
-            expect_type(stream_get(), TokenType::RCircleBracket);
+            expect_type(stream_get(), TokenType::RSquareBracket);
             break;
         }
         case TokenType::LCircleBracket:

@@ -19,7 +19,7 @@ namespace regex
 using std::vector;
 using std::array;
 using std::priority_queue;
-using std::string;
+using std::wstring;
 using std::tuple;
 
 class FSM
@@ -36,11 +36,15 @@ protected:
         generate(const DFA& dfa);
 public:
     FSM()
+        : _dropState(0)
+        , _invalidState(0)
     {
     }
-    FSM(const DFA& dfa)
+
+    explicit FSM(const DFA& dfa)
         : _stateMachine()
         , _endStates()
+        , _dropState(-1)
         , _invalidState()
     {
         auto paramPack = generate(dfa);
@@ -51,12 +55,14 @@ public:
     FSM(const FSM& fsm)
         : _stateMachine(fsm._stateMachine)
         , _endStates(fsm._endStates)
+        , _dropState(-1)
         , _invalidState(fsm._invalidState)
     {
     }
     FSM(const FSM&& fsm)
         : _stateMachine(std::move(fsm._stateMachine))
         , _endStates(std::move(fsm._endStates))
+        , _dropState(-1)
         , _invalidState(fsm._invalidState)
     {
     }
@@ -81,7 +87,7 @@ public:
         os << std::setw(3) << "";
         for (int i = 0; i < 256; i++)
         {
-            if (isprint(i))
+            if (iswprint(i))
             {
                 os << std::setw(3) << (char)i;
             }
@@ -109,11 +115,11 @@ public:
     }
 #endif //_DEBUG
 
-    size_t state_count() { return _stateMachine.size(); }
-    const vector<array<size_t, 256>>& state_machine() { return _stateMachine; }
-    size_t invalid_state() { return _invalidState; }
-    const vector<StateInfo>& end_states() { return _endStates; }
-    ptrdiff_t drop_state() { return _dropState; }
+    size_t state_count() const { return _stateMachine.size(); }
+    const vector<array<size_t, 256>>& state_machine() const { return _stateMachine; }
+    size_t invalid_state() const { return _invalidState; }
+    const vector<StateInfo>& end_states() const { return _endStates; }
+    ptrdiff_t drop_state() const { return _dropState; }
     void set_drop_state(const string& stateName)
     {
         for (auto iter = _endStates.begin(); iter != _endStates.end(); ++iter)

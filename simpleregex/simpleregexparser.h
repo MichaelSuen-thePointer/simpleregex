@@ -7,7 +7,8 @@
 #include <initializer_list>
 #include <sstream>
 #include <functional>
-#include <cctype>
+#include <cwctype>
+#include <locale>
 
 #if defined _DEBUG && defined PARSER_LOG
 
@@ -35,18 +36,27 @@ namespace regex
 {
 
 using std::shared_ptr;
+using std::wstring;
 using std::string;
+using namespace std::string_literals;
 
 class BadRegexToken : std::runtime_error
 {
 public:
-    char bad_token;
+    wchar_t bad_token;
     std::streamoff position;
-    BadRegexToken(const char* message, std::streamoff pos, const char token)
+    BadRegexToken(const char* message, std::streamoff pos, const wchar_t token)
         : std::runtime_error(message)
         , bad_token(token)
         , position(pos)
     {
+    }
+
+    virtual const char* what() const override
+    {
+        std::wostringstream message;
+        message << L"Bad token! '" << bad_token << "' at position: " << position;
+        return "temporally not supported";
     }
 };
 
@@ -71,7 +81,18 @@ public:
     struct RegexToken
     {
         RegexTokenType type;
-        char token;
+        wchar_t token;
+        RegexToken(RegexTokenType _type, wchar_t ch)
+            : type(_type)
+            , token(ch)
+        {
+        }
+        RegexToken(RegexTokenType _type, wint_t ch)
+            : type(_type)
+            , token(ch)
+        {
+            assert(ch != WEOF);
+        }
     };
 protected:
 
@@ -81,107 +102,107 @@ protected:
         InCharRange,
     };
 
-    std::istringstream _stream;
+    std::wistringstream _stream;
     RegexToken _prefetch;
 
     RegexToken generate_token()
     {
-        int ch = _stream.get();
-        if (ch == '\\')
+        auto ch = _stream.get();
+        if (ch == L'\\')
         {
             ch = _stream.get();
-            if (ch == 't')
+            if (ch == L't')
             {
-                return{ RegexTokenType::Char, '\t' };
+                return{ RegexTokenType::Char, L'\t' };
             }
-            if (ch == 'n')
+            if (ch == L'n')
             {
-                return{ RegexTokenType::Char, '\n' };
+                return{ RegexTokenType::Char, L'\n' };
             }
-            if (ch == '.')
+            if (ch == L'.')
             {
-                return{ RegexTokenType::AllChar, (char)ch };
+                return{ RegexTokenType::AllChar, ch };
             }
-            if (ch == -1)
+            if (ch == WEOF)
             {
-                throw BadRegexToken("meet end of input", _stream.tellg(), '\0');
+                throw BadRegexToken("meet end of input", _stream.tellg(), L'\0');
             }
             else
             {
-                return{ RegexTokenType::Char, (char)ch };
+                return{ RegexTokenType::Char, ch };
             }
         }
         switch (ch)
         {
-        case '*':
+        case L'*':
         {
-            return{ RegexTokenType::Star, (char)ch };
+            return{ RegexTokenType::Star, ch };
         }
-        case '|':
+        case L'|':
         {
-            return{ RegexTokenType::Alternative, (char)ch };
+            return{ RegexTokenType::Alternative, ch };
         }
-        case '(':
+        case L'(':
         {
-            return{ RegexTokenType::LCircleBracket, (char)ch };
+            return{ RegexTokenType::LCircleBracket, ch };
         }
-        case ')':
+        case L')':
         {
-            return{ RegexTokenType::RCircleBracket, (char)ch };
+            return{ RegexTokenType::RCircleBracket, ch };
         }
-        case '[':
+        case L'[':
         {
-            return{ RegexTokenType::LSquareBracket, (char)ch };
+            return{ RegexTokenType::LSquareBracket, ch };
         }
-        case ']':
+        case L']':
         {
-            return{ RegexTokenType::RSquareBracket, (char)ch };
+            return{ RegexTokenType::RSquareBracket, ch };
         }
-        case '-':
+        case L'-':
         {
-            return{ RegexTokenType::Slash, (char)ch };
+            return{ RegexTokenType::Slash, ch };
         }
-        case -1:
+        case WEOF:
         {
-            throw BadRegexToken("meet end of input", _stream.tellg(), '\0');
+            throw BadRegexToken("meet end of input", _stream.tellg(), L'\0');
         }
         default:
         {
-            if (std::isprint(ch))
+            if (std::iswprint(ch))
             {
-                return{ RegexTokenType::Char, (char)ch };
+                return{ RegexTokenType::Char, ch };
             }
-            throw BadRegexToken("bad token", _stream.tellg(), (char)ch);
+            throw BadRegexToken("bad token", _stream.tellg(), ch);
         }
         }
     }
 
     void generate_prefetch()
     {
-        if (_stream.peek() != -1)
+        if (_stream.peek() != WEOF)
         {
             _prefetch = generate_token();
         }
         else
         {
-            _prefetch = { RegexTokenType::EndToken, 0 };
+            _prefetch = { RegexTokenType::EndToken, L'\0' };
         }
     }
 
 public:
     RegexTokenizer()
         : _stream()
-        , _prefetch{ RegexTokenType::EndToken, 0 }
+        , _prefetch{ RegexTokenType::EndToken, L'\0' }
     {
     }
 
-    RegexTokenizer(string regex)
+    RegexTokenizer(const wstring& regex)
         : _stream(regex)
-        , _prefetch{ RegexTokenType::EndToken, 0 }
+        , _prefetch{ RegexTokenType::EndToken, L'\0' }
     {
         generate_prefetch();
     }
-    void reset(string regex)
+    void reset(const wstring& regex)
     {
         _stream.str(regex);
         _stream.seekg(0, _stream.beg);
@@ -200,7 +221,7 @@ public:
         generate_prefetch();
         return result;
     }
-    RegexToken peek()
+    RegexToken peek() const
     {
         return _prefetch;
     }
@@ -227,7 +248,7 @@ private:
 
     RegexTokenizer _token_stream;
 
-    Token stream_peek()
+    Token stream_peek() const
     {
         return _token_stream.peek();
     }
@@ -271,23 +292,15 @@ private:
     unique_ptr<IRegex> parse_escaping_all()
     {
         LOGGER << "escaping all\n";
-        unique_ptr<IRegex> rhs;
-        rhs = std::make_unique<Char>(9);
-        for (int i = 11; i < 256; i++)
-        {
-            auto lhs = std::make_unique<Char>(i);
-            auto expr = std::make_unique<Alternative>(lhs.release(), rhs.release());
-            rhs.reset(expr.release());
-        }
-        return rhs;
+        return std::make_unique<CharRange>(L'\1', std::numeric_limits<wchar_t>::max() - 1);
     }
 
     unique_ptr<IRegex> parse_char_range_or_term()
     {
         Token token = stream_get();
         expect_type(token, TokenType::Char);
-        char front = token.token;
-        char back = front;
+        auto front = token.token;
+        auto back = front;
         if (stream_peek().type == TokenType::Slash)
         {
             stream_get();
@@ -407,11 +420,11 @@ public:
         : _token_stream()
     {
     }
-    RegexParser(string regexp)
+    RegexParser(const wstring& regexp)
         : _token_stream(regexp)
     {
     }
-    void reset(string regexp)
+    void reset(const wstring& regexp)
     {
         _token_stream.reset(regexp);
     }
@@ -419,7 +432,7 @@ public:
     {
         _token_stream.reset();
     }
-    unique_ptr<IRegex> parse(string expr)
+    unique_ptr<IRegex> parse(const wstring& expr)
     {
         reset(expr);
         return parse();

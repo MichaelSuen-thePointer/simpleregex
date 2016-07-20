@@ -21,40 +21,40 @@ TEST(ParserTest, Tokenizer)
 {
     using Token = regex::RegexTokenizer::RegexToken;
     using Type = regex::RegexTokenizer::RegexTokenType;
-    const auto end = Token{ Type::EndToken, 0 };
+    const auto end = Token{ Type::EndToken, L'\0' };
 
     {
-        std::string regex = R"__(ab(c)[a-z|A-Z]&*\n\t\a\b\(\)\[\]\*\|.\.)__";
+        std::wstring regex = LR"__(ab(c)[a-z|A-Z]&*\n\t\a\b\(\)\[\]\*\|.\.)__";
         regex::RegexTokenizer tokenizer(regex);
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , 'a' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , 'b' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::LCircleBracket, '(' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , 'c' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::RCircleBracket, ')' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::LSquareBracket, '[' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , 'a' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Slash         , '-' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , 'z' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Alternative   , '|' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , 'A' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Slash         , '-' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , 'Z' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::RSquareBracket, ']' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , '&' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Star          , '*' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , '\n' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , '\t' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , 'a' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , 'b' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , '(' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , ')' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , '[' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , ']' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , '*' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , '|' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , '.' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::AllChar       , '.' }));
-        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::EndToken      , 0 }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'a' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'b' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::LCircleBracket, L'(' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'c' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::RCircleBracket, L')' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::LSquareBracket, L'[' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'a' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Slash         , L'-' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'z' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Alternative   , L'|' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'A' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Slash         , L'-' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'Z' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::RSquareBracket, L']' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'&' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Star          , L'*' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'\n' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'\t' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'a' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'b' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'(' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L')' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'[' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L']' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'*' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'|' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::Char          , L'.' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::AllChar       , L'.' }));
+        GTEST_TOKEN_EQ(tokenizer.get(), (Token{ Type::EndToken      , L'\0' }));
     }
 }
 
@@ -91,7 +91,7 @@ std::unique_ptr<regex::IRegex> ran(char a, char b)
 
 TEST(ParserTest, Parser_CharRange)
 {
-    std::string regex = "[a-cE-G|a|b|c]";
+    std::wstring regex = L"[a-cE-G|a|b|c]";
 
     regex::RegexParser parser(regex);
 
@@ -116,7 +116,7 @@ TEST(ParserTest, Parser_CharRange)
 
 TEST(ParserTest, Parser_Multiple)
 {
-    std::string regex = "([a-z|A-Z])a|b|cd*";
+    std::wstring regex = L"([a-z|A-Z])a|b|cd*";
 
     regex::RegexParser parser(regex);
 

@@ -11,10 +11,10 @@ namespace pl
 namespace regex
 {
 
-using iterator = std::string::iterator;
+using iterator = std::wstring::iterator;
 using std::unique_ptr;
 using std::shared_ptr;
-using std::string;
+using std::wstring;
 
 class Empty;
 class Char;
@@ -48,24 +48,24 @@ public:
     virtual void accept(IVisitor&) = 0;
 };
 
-class Empty: public IRegex
+class Empty : public IRegex
 {
 public:
     virtual bool match(iterator&) override;
     virtual void accept(IVisitor&) override;
 };
 
-class Char: public IRegex
+class Char : public IRegex
 {
 protected:
-    char _ch;
+    wchar_t _ch;
 public:
-    Char(char ch)
+    explicit Char(wchar_t ch)
         : _ch(ch)
     {
     }
 
-    char ch() { return _ch; }
+    wchar_t ch() const { return _ch; }
 
     virtual bool match(iterator&) override;
     virtual void accept(IVisitor&) override;
@@ -74,25 +74,25 @@ public:
 class CharRange : public IRegex
 {
 protected:
-    char _front;
-    char _back;
+    wchar_t _front;
+    wchar_t _back;
 public:
-    CharRange(char front, char back)
+    CharRange(wchar_t front, wchar_t back)
         : _front(front)
         , _back(back)
     {
         assert(front <= back);
     }
-    char front() { return _front; }
-    char back() { return _back; }
-    
-    bool in_range(char ch) { return ch >= _front && ch <= _back; }
+    wchar_t front() const { return _front; }
+    wchar_t back() const { return _back; }
+
+    bool in_range(wchar_t ch) const { return ch >= _front && ch <= _back; }
 
     virtual bool match(iterator&) override;
     virtual void accept(IVisitor&) override;
 };
 
-class Concat: public IRegex
+class Concat : public IRegex
 {
 protected:
     unique_ptr<IRegex> _left;
@@ -118,7 +118,7 @@ public:
     virtual void accept(IVisitor&) override;
 };
 
-class Alternative: public IRegex
+class Alternative : public IRegex
 {
 protected:
     unique_ptr<IRegex> _left;
@@ -144,7 +144,7 @@ public:
     virtual void accept(IVisitor& visitor) override;
 };
 
-class Kleene: public IRegex
+class Kleene : public IRegex
 {
 protected:
     unique_ptr<IRegex> _expr;

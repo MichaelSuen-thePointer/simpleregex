@@ -76,12 +76,12 @@ public:
         _regex = cloner.move_result();
     }
 
-    Regex(const string& text)
+    Regex(const wstring& text)
         : _regex(parse(text)._regex)
     {
     }
 
-    static Regex parse(const string& regex)
+    static Regex parse(const wstring& regex)
     {
         RegexParser parser(regex);
         return Regex(parser.parse());

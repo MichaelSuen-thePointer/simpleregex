@@ -45,7 +45,7 @@ private:
             start = _pool.front().get();
         }
 
-        vector<unique_ptr<Node>> move_pool()
+        vector<unique_ptr<Node>>&& move_pool()
         {
             return std::move(_pool);
         }
@@ -87,7 +87,7 @@ public:
     const vector<Node*>& end_states() const { return _endStates; }
 
     EpsilonNFA& combine_regex(IRegex* regex, const StateInfo& matchName);
-    EpsilonNFA& combine_regex(const string& regex, const StateInfo& matchName);
+    EpsilonNFA& combine_regex(const wstring& regex, const StateInfo& matchName);
     EpsilonNFA& combine_regex(Regex& regex, const StateInfo& matchName);
 };
 

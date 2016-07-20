@@ -14,6 +14,7 @@ namespace regex
 using std::shared_ptr;
 using std::weak_ptr;
 using std::vector;
+using std::wstring;
 using std::string;
 
 struct StateInfo
@@ -34,7 +35,7 @@ struct StateInfo
 struct Node;
 struct Edge
 {
-    char accept;
+    wchar_t accept;
     Node* next;
 };
 
@@ -46,7 +47,7 @@ struct Node
     {
         MIDDLE_STATE = -1
     };
-    Node(int label = MIDDLE_STATE, const string& name = string())
+    Node(int label = MIDDLE_STATE, const std::string& name = std::string())
         : stateInfo(label, name)
     {
     }

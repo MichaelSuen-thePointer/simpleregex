@@ -35,7 +35,7 @@ protected:
     static set<const Node*> find_epsilon_closure(const Node* node);
 
 private:
-    using state_pair = pair<Node*, string::const_iterator>;
+    using state_pair = pair<Node*, wstring::const_iterator>;
 
     struct state_pair_equal
     {
@@ -53,9 +53,9 @@ private:
         _matchStates.clear();
     }
 
-    bool unguarded_match(const string& text);
+    bool unguarded_match(const wstring& text);
 public:
-    NFA(const EpsilonNFA& enfa)
+    explicit NFA(const EpsilonNFA& enfa)
     {
         auto nfa = generate(enfa);
         _pool = std::move(nfa.first);
@@ -68,9 +68,9 @@ public:
 
     static pair<vector<unique_ptr<Node>>, Node*> generate(const EpsilonNFA& enfa);
 
-    vector<StateInfo> match_all(const string& text);
+    vector<StateInfo> match_all(const wstring& text);
 
-    StateInfo match_first(const string& text);
+    StateInfo match_first(const wstring& text);
 
     bool can_match()
     {

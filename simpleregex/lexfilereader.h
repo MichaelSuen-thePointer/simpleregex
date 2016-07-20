@@ -12,6 +12,7 @@
 namespace pl
 {
 using std::string;
+using std::wstring;
 using std::vector;
 
 class ParseError: public std::runtime_error
@@ -30,7 +31,7 @@ public:
     {
         int label;
         string name;
-        string regex;
+        wstring regex;
     };
 protected:
     string _className;

@@ -265,7 +265,6 @@ public:
         try
         {
             reader.read_file(fileAddr);
-
         }
         catch (::BadToken bd)
         {

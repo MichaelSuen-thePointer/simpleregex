@@ -60,8 +60,8 @@ void EpsilonNFA::NFAGenerator::visit(Kleene& node)
 
     adopt_pool(expr._pool);
 
-    expr.end->edges.push_back(Edge{ '\0', expr.start });
-    expr.start->edges.push_back(Edge{ '\0', expr.end });
+    expr.end->edges.push_back(Edge{ L'\0', expr.start });
+    expr.start->edges.push_back(Edge{ L'\0', expr.end });
     start = expr.start;
     end = expr.end;
     end->stateInfo = _info;
@@ -71,7 +71,7 @@ void EpsilonNFA::NFAGenerator::visit(CharRange& node)
 {
     _pool.push_back(std::make_unique<Node>());
     end = _pool.back().get();
-    for (char ch = node.front(); ch <= node.back(); ch++)
+    for (auto ch = node.front(); ch <= node.back(); ch++)
     {
         start->edges.push_back({ ch, end });
     }
@@ -116,13 +116,13 @@ EpsilonNFA& EpsilonNFA::combine_regex(IRegex* regex, const StateInfo& matchName)
     }
     else
     {
-        _startState->edges.push_back(Edge{ '\0', generator.start });
+        _startState->edges.push_back(Edge{ L'\0', generator.start });
     }
     _endStates.push_back(generator.end);
     return *this;
 }
 
-EpsilonNFA& EpsilonNFA::combine_regex(const string& regex, const StateInfo& matchName)
+EpsilonNFA& EpsilonNFA::combine_regex(const wstring& regex, const StateInfo& matchName)
 {
     RegexParser parser(regex);
     return combine_regex(parser.parse().get(), matchName);

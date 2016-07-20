@@ -67,7 +67,7 @@ inline set<const Node*> NFA::find_epsilon_closure(const Node * node)
 
     return closure;
 }
-bool NFA::unguarded_match(const string & text)
+bool NFA::unguarded_match(const wstring & text)
 {
     const auto& current = _matchStates.front();
     if (current.second == text.end())
@@ -140,7 +140,7 @@ pair<vector<unique_ptr<Node>>, Node*> NFA::generate(const EpsilonNFA & enfa)
     return std::make_pair(std::move(pool), start);
 }
 
-vector<StateInfo> NFA::match_all(const string & text)
+vector<StateInfo> NFA::match_all(const wstring & text)
 {
     _matchStates.push({_start, text.begin()});
 
@@ -152,7 +152,7 @@ vector<StateInfo> NFA::match_all(const string & text)
     return _results;
 }
 
-StateInfo NFA::match_first(const string & text)
+StateInfo NFA::match_first(const wstring & text)
 {
     _matchStates.push({_start, text.begin()});
 
